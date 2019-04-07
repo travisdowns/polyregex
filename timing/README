@@ -26,3 +26,13 @@ Russ Cox
 January 2007
 http://swtch.com/~rsc/regexp/
 
+
+----
+
+Notes added by Travis:
+
+run the command like 
+
+PATH=".:$PATH" xtime -s xegrep xgawk xmawk xnfa xpcre xperl xpython xruby xtcl
+
+or else it won't find the scripts in the cwb on most distros where . is no in $PATH by default

@@ -47,7 +47,9 @@ sub time1 {
 	# print STDERR "Running ", join(' | ', @a), "\n";
 	open(STDOUT, ">/tmp/xxx.xtime");
 	$m0 = atime();
-	system @a;
+	if (system @a) {
+	   die "running command ", $a[0], " failed!"
+    }
 	$m1 = atime();
 	close(STDOUT);
 	($_, $_, $c1, $_) = times;
