@@ -5,31 +5,26 @@ import static com.google.common.base.Preconditions.checkState;
 import static travisdowns.github.io.Parser.Token.Type.ALT;
 import static travisdowns.github.io.Parser.Token.Type.BACKREF;
 import static travisdowns.github.io.Parser.Token.Type.CHAR;
-import static travisdowns.github.io.Parser.Token.Type.CLOSEP;
 import static travisdowns.github.io.Parser.Token.Type.CONCAT;
-import static travisdowns.github.io.Parser.Token.Type.DOT;
-import static travisdowns.github.io.Parser.Token.Type.OPENP;
-import static travisdowns.github.io.Parser.Token.Type.PLUS;
-import static travisdowns.github.io.Parser.Token.Type.STAR;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * https://eddmann.com/posts/shunting-yard-implementation-in-java/
- * 
- * @author Edd Mann
- * @author tdowns
+ * Based on https://swtch.com/~rsc/regexp/nfa.c.txt
  */
 public class Parser {
 
     static class Token {
 
         enum Type {
-            STAR("*"), DOT("."), PLUS("+"), ALT("|"), OPENP("("), CLOSEP(")"), CONCAT("#"), BACKREF(null), CHAR(null);
+            STAR("*"), DOT("."), PLUS("+"), ALT("|"), OPENP("("), CLOSEP(")"), QUESTION("?"),
+            CONCAT("#"), BACKREF(null), CHAR(null);
 
             final String symbol;
 
@@ -47,7 +42,7 @@ public class Parser {
         Object data;
 
         private Token(Type type, Object data) {
-            this.type = type;
+            this.type = checkNotNull(type);
             this.data = data;
         }
 
@@ -72,46 +67,35 @@ public class Parser {
             }
         }
     }
+    
+    private static final Map<Character,Token> CHAR_TO_TOKEN = new HashMap<>();
+    
+    static {
+        for (Token.Type type : Token.Type.values()) {
+            if (type.symbol != null && type != Token.Type.CONCAT) {
+                CHAR_TO_TOKEN.put(type.symbol.charAt(0), new Token(type, null));
+            }
+        }
+    }
 
     private static List<Token> lex(String input) {
         List<Token> ret = new ArrayList<>();
-        ret.add(Token.makeOp(OPENP)); // we surround the expression with () which makes parsing easier
+        ret.add(CHAR_TO_TOKEN.get('(')); // we surround the expression with () which makes parsing easier
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             Token t;
-            switch (c) {
-            case '*':
-                t = new Token(STAR, null);
-                break;
-            case '.':
-                t = new Token(DOT, null);
-                break;
-            case '+':
-                t = new Token(PLUS, null);
-                break;
-            case '|':
-                t = new Token(ALT, null);
-                break;
-            case '(':
-                t = new Token(OPENP, null);
-                break;
-            case ')':
-                t = new Token(CLOSEP, null);
-                break;
-            case '\\':
+            if (c == '\\') {
                 int digit = Integer.parseInt("" + input.charAt(++i));
-                t = new Token(BACKREF, digit);
-                break;
-            default:
-                if (Character.toString(c).matches("[a-zA-Z]")) {
-                    t = new Token(CHAR, c);
-                    break;
-                }
+                ret.add(new Token(BACKREF, digit));
+            } else if ((t = CHAR_TO_TOKEN.get(c)) != null) {
+                ret.add(t);
+            } else if (Character.toString(c).matches("[a-zA-Z]")) {
+                ret.add(new Token(CHAR, c));
+            } else {
                 throw new RuntimeException("Unexpected character while lexing: " + c);
-            }
-            ret.add(t);
+            }           
         }
-        ret.add(Token.makeOp(CLOSEP));
+        ret.add(CHAR_TO_TOKEN.get(')'));
         return ret;
     }
 
@@ -171,10 +155,13 @@ public class Parser {
                 break;
             case STAR:
             case PLUS:
+            case QUESTION:
                 checkState(p.natom > 0, "unexpected %s with no atoms", token.type);
                 dst.add(token);
                 break;
-            default:
+            case CHAR:
+            case BACKREF:
+            case DOT:
                 // TODO: do we really need this?
                 if (p.natom > 1) {
                     p.natom--;
@@ -183,6 +170,8 @@ public class Parser {
                 dst.add(token);
                 p.natom++;
                 break;
+            default:
+                checkState(false, "unknown token type in parsing: %s", token.type);
             }
         }
         if (!parens.isEmpty()) {

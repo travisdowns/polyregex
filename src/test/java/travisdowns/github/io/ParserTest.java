@@ -9,10 +9,16 @@ import org.junit.Test;
 import travisdowns.github.io.Parser.Token;
 
 public class ParserTest {
+    
 	public static String postfixStr(String input) {
 		List<Token> postfix = Parser.toPostfix(input);
 		return postfix.stream().map(Token::toString).collect(Collectors.joining());
 	}
+	
+	@Test
+    public void testOneChar() {
+        Assert.assertEquals(postfixStr("a"), "a");
+    }
 	
     @Test
     public void testBasicParsing()
@@ -33,5 +39,10 @@ public class ParserTest {
     @Test
     public void testDoubleParens() {
     	Assert.assertEquals(postfixStr("(a)(b)"), "ab#");
+    }
+    
+    @Test
+    public void testQuestion() {
+        Assert.assertEquals(postfixStr("a?"), "a?");
     }
 }

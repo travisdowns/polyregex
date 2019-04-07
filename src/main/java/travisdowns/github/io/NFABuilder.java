@@ -5,7 +5,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 
@@ -89,6 +88,11 @@ public class NFABuilder {
                 e1 = stack.pop();
                 s = State.makeSplit(id++, e1.start, e2.start);
                 stack.push(new Frag(s, append(e1.out, e2.out)));
+                break;
+            case QUESTION:   /* zero or one */
+                e = stack.pop();
+                s = State.makeSplit(id++, e.start, null);
+                stack.push(new Frag(s, append(e.out, Frag.singleton(s.out1))));
                 break;
             case STAR: /* zero or more */
                 e = stack.pop();

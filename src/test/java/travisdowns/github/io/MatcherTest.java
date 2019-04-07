@@ -79,7 +79,11 @@ public class MatcherTest {
 		assertTrue (Matcher.matches("(a)(b)", "ab"));
 	}
 	
-	
-
+	@Test
+	public void testQuestion() {
+	    assertTrue (Matcher.matches("a?", ""));
+	    assertTrue (Matcher.matches("a?", "a"));
+	    assertFalse(Matcher.matches("a?", "aa"));
+	}
 
 }
