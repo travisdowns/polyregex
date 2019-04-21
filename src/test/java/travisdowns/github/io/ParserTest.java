@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
 
-import travisdowns.github.io.Parser.Token;
-
 public class ParserTest {
     
 	public static String postfixStr(String input) {

@@ -13,14 +13,14 @@ public class State {
     public static State MATCHSTATE = new State(Type.MATCH, 0);
 
     enum Type {
-        CHAR, ANY, SPLIT, MATCH;
+        CHAR, ANY, SPLIT, MATCH, LPAREN, RPAREN;
     }
 
-    char c;
+    int c;
     StateRef out;
     StateRef out1;
     final int id;
-    final State.Type type;
+    final Type type;
 
     private State(State.Type type, int id) {
         this.type = type;
@@ -46,6 +46,20 @@ public class State {
         s.out1 = new StateRef(out1);
         return s;
     }
+    
+    public static State makeLParen(int id, int parenIdx, State out) {
+        State s = new State(Type.LPAREN, id);
+        s.c = parenIdx;
+        s.out = new StateRef(out);
+        return s;
+    }
+    
+    public static State makeRParen(int id, int parenIdx) {
+        State s = new State(Type.RPAREN, id);
+        s.c = parenIdx;
+        s.out = new StateRef(null);
+        return s;
+    }
 
     @Override
     public String toString() {
@@ -54,19 +68,24 @@ public class State {
 
     private String toString(boolean recurse) {
         switch (type) {
-        case MATCH:
-            return "MATCH";
         case CHAR:
-            return "CHAR[" + c + "]";
-        case ANY:
-            return "ANY";
+            return "CHAR[" + (char)c + "]";
         case SPLIT:
             if (recurse) {
                 return "SPLIT[out=" + out.s.toString(false) + ",out1=" + out1.s.toString(false) + "]";
             } else {
                 return "SPLIT[...]";
             }
+        case LPAREN:
+            return "(";
+        case RPAREN:
+            return ")";
+        default:
+            return "Unhandled State, type = " + type;
         }
-        return "missing case in state toString(): " + super.toString();
+    }
+
+    public boolean isParen() {
+        return type == Type.LPAREN || type == Type.RPAREN;
     }
 }

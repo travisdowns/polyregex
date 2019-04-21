@@ -9,14 +9,11 @@ import java.util.Set;
 
 import com.google.common.base.Joiner;
 
-/**
- * Based on match and associated functions from https://swtch.com/~rsc/regexp/nfa.c.txt originally written by Russ Cox,
- * converted to Java by Travis Downs.
- * 
- * MIT license, see LICENSE file.
- */
-public class NFARunner {
 
+public class BackrefMatcher implements Matcher {
+    
+    private final State start;
+    
     private class StateList {
         final ArrayList<State> list;
         final Set<Integer> ids;
@@ -31,12 +28,19 @@ public class NFARunner {
             checkNotNull(s);
             if (!ids.contains(s.id)) {
                 ids.add(s.id);
-                if (s.type == State.Type.SPLIT) {
+                switch (s.type) {
+                case SPLIT:
                     /* follow unlabeled arrows */
                     addstate(s.out.s);
                     addstate(s.out1.s);
-                } else {
-                    checkState(!s.isParen(), "this runner doesn't support parens");
+                    break;
+                case LPAREN:
+                case RPAREN:
+                    checkState(s.out1 == null);
+                    // just add the next state
+                    addstate(s.out.s);
+                    break;
+                default:
                     list.add(s);
                 }
             }
@@ -52,6 +56,13 @@ public class NFARunner {
             return Joiner.on(", ").join(list);
         }
     }
+    
+    public BackrefMatcher(String pattern) {
+        RegexParser parser = new RegexParser(pattern);
+        checkState(parser.parse(), "parse() returned false");
+        this.start = parser.start;
+    }
+
     /*
      * typedef struct List List; struct List { State **s; int n; };
      * 
@@ -62,8 +73,6 @@ public class NFARunner {
 
     /* Compute initial state list */
     private StateList startlist(State start) {
-        // TODO: currently we can only run once against State objects because we
-        // don't reset the generation counter - just get rid of that mechanism?
         StateList l = new StateList();
         l.addstate(start);
         return l;
@@ -82,18 +91,19 @@ public class NFARunner {
         return nlist;
     }
 
+
+    @Override
     /* Run NFA to determine whether it matches s. */
-    private boolean match(State start, String str) {
+    public boolean matches(String text) {
         StateList list = startlist(start);
-        for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
             list = step(list, c);
         }
         return list.ismatch();
     }
 
-    public static boolean matches(State start, String str) {
-        return new NFARunner().match(start, str);
+    public static boolean matches(String pattern, String text) {
+        return new BackrefMatcher(pattern).matches(text); 
     }
-
 }

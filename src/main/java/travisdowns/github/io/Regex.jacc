@@ -1,0 +1,111 @@
+/*
+ * Based on grammar in
+ * https://swtch.com/~rsc/regexp/nfa-perl.y.txt
+ * by Russ Cox, converted to jacc by Travis Downs
+ */
+
+%package travisdowns.github.io
+%extends ParserBase
+
+
+%token  <Character> CHAR
+
+%type   <Frag>  alt concat repeat single line
+%type   <Integer>    count
+
+%%
+
+line: /* empty */
+    {
+        start = State.MATCHSTATE;
+    }
+| alt
+    {
+        Frag f = paren($1, 0);
+        patch(f.out, State.MATCHSTATE);
+        start = f.start;
+    }
+;
+
+alt:
+    concat
+|   alt '|' concat
+    {
+        State s = State.makeSplit(id++, $1.start, $3.start);
+        $$ = new Frag(s, append($1.out, $3.out));
+    }
+;
+
+concat:
+    repeat
+|   concat repeat
+    {
+        patch($1.out, $2.start);
+        $$ = new Frag($1.start, $2.out);
+    }
+;
+
+repeat:
+    single
+|   single '*'
+    {
+        State s = State.makeSplit(id++, $1.start, null);
+        patch($1.out, s);
+        $$ = new Frag(s, s.out1);
+    }
+|   single '*' '?'
+    {
+        State s = State.makeSplit(id++, null, $1.start);
+        patch($1.out, s);
+        $$ = new Frag(s, s.out1);
+    }
+|   single '+'
+    {
+        State s = State.makeSplit(id++, $1.start, null);
+        patch($1.out, s);
+        $$ = new Frag($1.start, s.out1);
+    }
+|   single '+' '?'
+    {
+        State s = State.makeSplit(id++, null, $1.start);
+        patch($1.out, s);
+        $$ = new Frag($1.start, s.out);
+    }
+|   single '?'
+    {
+        State s = State.makeSplit(id++, $1.start, null);
+        $$ = new Frag(s, append($1.out, s.out1));
+    }
+|   single '?' '?'
+    {
+        State s = State.makeSplit(id++, null, $1.start);
+        $$ = new Frag(s, append($1.out, s.out));
+    }
+;
+
+count:  { $$ = ++nparen; } ;
+
+single:
+    '(' count alt ')'
+    {
+        $$ = paren($3, $2);
+    }
+|   '(' '?' ':' alt ')'
+    {
+        $$ = $4;
+    }
+|   CHAR
+    {
+        State s = State.makeChar(id++, $1);
+        $$ = new Frag(s, s.out);
+    }
+|   '.'
+    {
+        State s = State.makeDot(id++);
+        $$ = new Frag(s, s.out);
+    }
+;
+
+%%
+
+    RegexParser(String input) { super(input); }

@@ -4,39 +4,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import travisdowns.github.io.Parser.Token;
 import travisdowns.github.io.State.StateRef;
 
 /**
- * Based on post2nfa and associated functions from https://swtch.com/~rsc/regexp/nfa.c.txt originally written by Russ
+ * Partly based on post2nfa and associated functions from https://swtch.com/~rsc/regexp/nfa.c.txt originally written by Russ
  * Cox, converted to Java by Travis Downs.
  */
 public class NFABuilder {
-
-    private static class Frag {
-        State start;
-        List<StateRef> out;
-
-        public Frag(State start, List<StateRef> out) {
-            this.start = start;
-            this.out = out;
-        }
-
-        public Frag(State start, StateRef out) {
-            this(start, singleton(out));
-        }
-
-        public static List<StateRef> singleton(StateRef out) {
-            checkNotNull(out);
-            List<StateRef> ret = new ArrayList<>();
-            ret.add(out);
-            return ret;
-        }
-    }
 
     /* Patch the list of states at out to point to start. */
     static void patch(List<StateRef> reflist, State s) {

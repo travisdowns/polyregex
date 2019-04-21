@@ -1,89 +1,130 @@
 package travisdowns.github.io;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.function.Function;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+
+@RunWith(Parameterized.class)
 public class MatcherTest {
+    
+    @Parameters(name = "{0}")
+    public static List<Class<?>[]> getMatcherFactories() {
+        return ImmutableList.of(
+                new Class<?>[]{ OriginalMatcher.class },
+                new Class<?>[]{ BackrefMatcher.class }
+                );
+    }
+    
+    @Parameter
+    public Class<? extends Matcher> matcherClass;
+    
+    Matcher matcherFor(String pattern) {
+        try {
+            return matcherClass.getConstructor(String.class).newInstance(pattern);
+        } catch (InvocationTargetException e) {
+            Throwables.throwIfUnchecked(e.getCause());
+            throw new RuntimeException(e.getCause());
+        } catch (Exception e) {
+            Throwables.throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
+    }
+    
+    boolean matches(String pattern, String text) {
+        Matcher m = matcherFor(pattern);
+        return m.matches(text);
+    }
 
 	@Test
 	public void emptyString() {
-		assertTrue(Matcher.matches("", ""));
+		assertTrue(matches("", ""));
 	}
 	
 	@Test
 	public void oneChar() {
-		assertTrue(Matcher.matches("x", "x"));
+		assertTrue(matches("x", "x"));
 	}
 	
 	@Test
 	public void moreChars() {
-		assertTrue(Matcher.matches("abc", "abc"));
-		assertFalse(Matcher.matches("abc", "abcd"));
-		assertFalse(Matcher.matches("abc", "dabc"));
+		assertTrue(matches("abc", "abc"));
+		assertFalse(matches("abc", "abcd"));
+		assertFalse(matches("abc", "dabc"));
 	}
 	
 	@Test
 	public void oneDot() {
-		assertTrue(Matcher.matches(".", "a"));
+		assertTrue(matches(".", "a"));
 	}
 	
 	@Test
 	public void moreDots() {
-		assertTrue(Matcher.matches("..", "ab"));
-		assertTrue(Matcher.matches("...", "abc"));
-		assertFalse(Matcher.matches("...", "ab"));
-		assertFalse(Matcher.matches("...", "abcd"));
+		assertTrue(matches("..", "ab"));
+		assertTrue(matches("...", "abc"));
+		assertFalse(matches("...", "ab"));
+		assertFalse(matches("...", "abcd"));
 	}
 	
 	@Test
 	public void oneStar() {
-		assertTrue(Matcher.matches("a*", ""));
-		assertTrue(Matcher.matches("a*", "a"));
-		assertTrue(Matcher.matches("a*", "aaaaaaaa"));
-		assertFalse(Matcher.matches("a*", "aaaaaaaab"));
-		assertTrue(Matcher.matches("a*b", "aaaaaaaab"));
+		assertTrue(matches("a*", ""));
+		assertTrue(matches("a*", "a"));
+		assertTrue(matches("a*", "aaaaaaaa"));
+		assertFalse(matches("a*", "aaaaaaaab"));
+		assertTrue(matches("a*b", "aaaaaaaab"));
 	}
 	
 	@Test
 	public void onePlus() {
-		assertFalse(Matcher.matches("a+", ""));
-		assertTrue(Matcher.matches("a+", "a"));
-		assertTrue(Matcher.matches("a+", "aaaaaaaa"));
-		assertFalse(Matcher.matches("a+", "aaaaaaaab"));
-		assertTrue(Matcher.matches("a+b", "aaaaaaaab"));
+		assertFalse(matches("a+", ""));
+		assertTrue(matches("a+", "a"));
+		assertTrue(matches("a+", "aaaaaaaa"));
+		assertFalse(matches("a+", "aaaaaaaab"));
+		assertTrue(matches("a+b", "aaaaaaaab"));
 	}
 	
 	@Test
 	public void simpleAlt() {
-		assertTrue (Matcher.matches("a|b", "a"));
-		assertTrue (Matcher.matches("a|b", "b"));
-		assertFalse(Matcher.matches("a|b", "c"));
+		assertTrue (matches("a|b", "a"));
+		assertTrue (matches("a|b", "b"));
+		assertFalse(matches("a|b", "c"));
 		
-		assertTrue(Matcher.matches("aA|bB", "aA"));
-		assertTrue(Matcher.matches("aA|bB", "bB"));
-		assertFalse(Matcher.matches("aA|bB", "aB"));
+		assertTrue(matches("aA|bB", "aA"));
+		assertTrue(matches("aA|bB", "bB"));
+		assertFalse(matches("aA|bB", "aB"));
 	}
 	
 	@Test
 	public void testParensStar() {
-		assertTrue (Matcher.matches("(ab)*", ""));
-		assertTrue (Matcher.matches("(ab)*", "ab"));
-		assertTrue (Matcher.matches("(ab)*", "ababab"));
-		assertTrue (Matcher.matches("(ab)*(cdef)*", "abababcdefcdef"));
-		assertTrue (Matcher.matches("((ab)*(cdef)*)*", "abababcdefcdefababcdef"));
+		assertTrue (matches("(ab)*", ""));
+		assertTrue (matches("(ab)*", "ab"));
+		assertTrue (matches("(ab)*", "ababab"));
+		assertTrue (matches("(ab)*(cdef)*", "abababcdefcdef"));
+		assertTrue (matches("((ab)*(cdef)*)*", "abababcdefcdefababcdef"));
 	}
 	
 	@Test
 	public void testDoubleParens() {
-		assertTrue (Matcher.matches("(a)(b)", "ab"));
+		assertTrue (matches("(a)(b)", "ab"));
 	}
 	
 	@Test
 	public void testQuestion() {
-	    assertTrue (Matcher.matches("a?", ""));
-	    assertTrue (Matcher.matches("a?", "a"));
-	    assertFalse(Matcher.matches("a?", "aa"));
+	    assertTrue (matches("a?", ""));
+	    assertTrue (matches("a?", "a"));
+	    assertFalse(matches("a?", "aa"));
 	}
 
 }
