@@ -1,4 +1,4 @@
-// Output created by jacc on Fri Apr 19 20:10:07 COT 2019
+// Output created by jacc on Sat Apr 20 22:23:29 COT 2019
 
 package travisdowns.github.io;
 
@@ -26,22 +26,25 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 25:
+                case 26:
                     switch (yytok) {
-                        case CHAR:
+                        case BACKREF:
                             yyn = 6;
                             continue;
-                        case '(':
+                        case CHAR:
                             yyn = 7;
                             continue;
-                        case '.':
+                        case '(':
                             yyn = 8;
+                            continue;
+                        case '.':
+                            yyn = 9;
                             continue;
                         case ENDINPUT:
                             yyn = yyr1();
                             continue;
                     }
-                    yyn = 53;
+                    yyn = 55;
                     continue;
 
                 case 1:
@@ -49,13 +52,13 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 26:
+                case 27:
                     switch (yytok) {
                         case ENDINPUT:
-                            yyn = 50;
+                            yyn = 52;
                             continue;
                     }
-                    yyn = 53;
+                    yyn = 55;
                     continue;
 
                 case 2:
@@ -63,7 +66,7 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 27:
+                case 28:
                     yyn = yys2();
                     continue;
 
@@ -72,16 +75,16 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 28:
+                case 29:
                     switch (yytok) {
                         case '|':
-                            yyn = 10;
+                            yyn = 11;
                             continue;
                         case ENDINPUT:
                             yyn = yyr2();
                             continue;
                     }
-                    yyn = 53;
+                    yyn = 55;
                     continue;
 
                 case 4:
@@ -89,14 +92,14 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 29:
+                case 30:
                     switch (yytok) {
+                        case '*':
+                        case '+':
                         case '?':
                         case ':':
                         case error:
-                        case '*':
-                        case '+':
-                            yyn = 53;
+                            yyn = 55;
                             continue;
                     }
                     yyn = yyr5();
@@ -107,20 +110,20 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 30:
+                case 31:
                     switch (yytok) {
                         case error:
                         case ':':
-                            yyn = 53;
+                            yyn = 55;
                             continue;
                         case '*':
-                            yyn = 11;
-                            continue;
-                        case '+':
                             yyn = 12;
                             continue;
-                        case '?':
+                        case '+':
                             yyn = 13;
+                            continue;
+                        case '?':
+                            yyn = 14;
                             continue;
                     }
                     yyn = yyr7();
@@ -135,14 +138,14 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 31:
+                case 32:
                     switch (yytok) {
-                        case ':':
                         case error:
-                            yyn = 53;
+                        case ':':
+                            yyn = 55;
                             continue;
                     }
-                    yyn = yyr17();
+                    yyn = yyr19();
                     continue;
 
                 case 7:
@@ -154,18 +157,14 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 32:
+                case 33:
                     switch (yytok) {
-                        case '?':
-                            yyn = 15;
-                            continue;
-                        case '.':
-                        case '(':
-                        case CHAR:
-                            yyn = yyr14();
+                        case error:
+                        case ':':
+                            yyn = 55;
                             continue;
                     }
-                    yyn = 53;
+                    yyn = yyr17();
                     continue;
 
                 case 8:
@@ -177,36 +176,23 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 33:
+                case 34:
                     switch (yytok) {
-                        case ':':
-                        case error:
-                            yyn = 53;
+                        case '?':
+                            yyn = 16;
+                            continue;
+                        case '.':
+                        case '(':
+                        case CHAR:
+                        case BACKREF:
+                            yyn = yyr14();
                             continue;
                     }
-                    yyn = yyr18();
+                    yyn = 55;
                     continue;
 
                 case 9:
                     yyst[yysp] = 9;
-                    if (++yysp>=yyst.length) {
-                        yyexpand();
-                    }
-                case 34:
-                    switch (yytok) {
-                        case '?':
-                        case ':':
-                        case error:
-                        case '*':
-                        case '+':
-                            yyn = 53;
-                            continue;
-                    }
-                    yyn = yyr6();
-                    continue;
-
-                case 10:
-                    yyst[yysp] = 10;
                     yysv[yysp] = (lexer.getSemantic()
                                  );
                     yytok = (lexer.nextToken()
@@ -216,17 +202,30 @@ class RegexParser extends ParserBase implements RegexTokens {
                     }
                 case 35:
                     switch (yytok) {
-                        case CHAR:
-                            yyn = 6;
-                            continue;
-                        case '(':
-                            yyn = 7;
-                            continue;
-                        case '.':
-                            yyn = 8;
+                        case error:
+                        case ':':
+                            yyn = 55;
                             continue;
                     }
-                    yyn = 53;
+                    yyn = yyr18();
+                    continue;
+
+                case 10:
+                    yyst[yysp] = 10;
+                    if (++yysp>=yyst.length) {
+                        yyexpand();
+                    }
+                case 36:
+                    switch (yytok) {
+                        case '*':
+                        case '+':
+                        case '?':
+                        case ':':
+                        case error:
+                            yyn = 55;
+                            continue;
+                    }
+                    yyn = yyr6();
                     continue;
 
                 case 11:
@@ -238,19 +237,22 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 36:
+                case 37:
                     switch (yytok) {
-                        case '+':
-                        case ':':
-                        case error:
-                        case '*':
-                            yyn = 53;
+                        case BACKREF:
+                            yyn = 6;
                             continue;
-                        case '?':
-                            yyn = 17;
+                        case CHAR:
+                            yyn = 7;
+                            continue;
+                        case '(':
+                            yyn = 8;
+                            continue;
+                        case '.':
+                            yyn = 9;
                             continue;
                     }
-                    yyn = yyr8();
+                    yyn = 55;
                     continue;
 
                 case 12:
@@ -262,19 +264,19 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 37:
+                case 38:
                     switch (yytok) {
-                        case '+':
-                        case ':':
                         case error:
+                        case '+':
                         case '*':
-                            yyn = 53;
+                        case ':':
+                            yyn = 55;
                             continue;
                         case '?':
                             yyn = 18;
                             continue;
                     }
-                    yyn = yyr10();
+                    yyn = yyr8();
                     continue;
 
                 case 13:
@@ -286,43 +288,23 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 38:
+                case 39:
                     switch (yytok) {
-                        case '+':
-                        case ':':
                         case error:
+                        case '+':
                         case '*':
-                            yyn = 53;
+                        case ':':
+                            yyn = 55;
                             continue;
                         case '?':
                             yyn = 19;
                             continue;
                     }
-                    yyn = yyr12();
+                    yyn = yyr10();
                     continue;
 
                 case 14:
                     yyst[yysp] = 14;
-                    if (++yysp>=yyst.length) {
-                        yyexpand();
-                    }
-                case 39:
-                    switch (yytok) {
-                        case CHAR:
-                            yyn = 6;
-                            continue;
-                        case '(':
-                            yyn = 7;
-                            continue;
-                        case '.':
-                            yyn = 8;
-                            continue;
-                    }
-                    yyn = 53;
-                    continue;
-
-                case 15:
-                    yyst[yysp] = 15;
                     yysv[yysp] = (lexer.getSemantic()
                                  );
                     yytok = (lexer.nextToken()
@@ -332,24 +314,44 @@ class RegexParser extends ParserBase implements RegexTokens {
                     }
                 case 40:
                     switch (yytok) {
+                        case error:
+                        case '+':
+                        case '*':
                         case ':':
-                            yyn = 21;
+                            yyn = 55;
+                            continue;
+                        case '?':
+                            yyn = 20;
                             continue;
                     }
-                    yyn = 53;
+                    yyn = yyr12();
                     continue;
 
-                case 16:
-                    yyst[yysp] = 16;
+                case 15:
+                    yyst[yysp] = 15;
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
                 case 41:
-                    yyn = yys16();
+                    switch (yytok) {
+                        case BACKREF:
+                            yyn = 6;
+                            continue;
+                        case CHAR:
+                            yyn = 7;
+                            continue;
+                        case '(':
+                            yyn = 8;
+                            continue;
+                        case '.':
+                            yyn = 9;
+                            continue;
+                    }
+                    yyn = 55;
                     continue;
 
-                case 17:
-                    yyst[yysp] = 17;
+                case 16:
+                    yyst[yysp] = 16;
                     yysv[yysp] = (lexer.getSemantic()
                                  );
                     yytok = (lexer.nextToken()
@@ -359,15 +361,20 @@ class RegexParser extends ParserBase implements RegexTokens {
                     }
                 case 42:
                     switch (yytok) {
-                        case '?':
                         case ':':
-                        case error:
-                        case '*':
-                        case '+':
-                            yyn = 53;
+                            yyn = 22;
                             continue;
                     }
-                    yyn = yyr9();
+                    yyn = 55;
+                    continue;
+
+                case 17:
+                    yyst[yysp] = 17;
+                    if (++yysp>=yyst.length) {
+                        yyexpand();
+                    }
+                case 43:
+                    yyn = yys17();
                     continue;
 
                 case 18:
@@ -379,17 +386,17 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 43:
+                case 44:
                     switch (yytok) {
+                        case '*':
+                        case '+':
                         case '?':
                         case ':':
                         case error:
-                        case '*':
-                        case '+':
-                            yyn = 53;
+                            yyn = 55;
                             continue;
                     }
-                    yyn = yyr11();
+                    yyn = yyr9();
                     continue;
 
                 case 19:
@@ -401,38 +408,21 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 44:
+                case 45:
                     switch (yytok) {
+                        case '*':
+                        case '+':
                         case '?':
                         case ':':
                         case error:
-                        case '*':
-                        case '+':
-                            yyn = 53;
+                            yyn = 55;
                             continue;
                     }
-                    yyn = yyr13();
+                    yyn = yyr11();
                     continue;
 
                 case 20:
                     yyst[yysp] = 20;
-                    if (++yysp>=yyst.length) {
-                        yyexpand();
-                    }
-                case 45:
-                    switch (yytok) {
-                        case '|':
-                            yyn = 10;
-                            continue;
-                        case ')':
-                            yyn = 22;
-                            continue;
-                    }
-                    yyn = 53;
-                    continue;
-
-                case 21:
-                    yyst[yysp] = 21;
                     yysv[yysp] = (lexer.getSemantic()
                                  );
                     yytok = (lexer.nextToken()
@@ -442,17 +432,32 @@ class RegexParser extends ParserBase implements RegexTokens {
                     }
                 case 46:
                     switch (yytok) {
-                        case CHAR:
-                            yyn = 6;
-                            continue;
-                        case '(':
-                            yyn = 7;
-                            continue;
-                        case '.':
-                            yyn = 8;
+                        case '*':
+                        case '+':
+                        case '?':
+                        case ':':
+                        case error:
+                            yyn = 55;
                             continue;
                     }
-                    yyn = 53;
+                    yyn = yyr13();
+                    continue;
+
+                case 21:
+                    yyst[yysp] = 21;
+                    if (++yysp>=yyst.length) {
+                        yyexpand();
+                    }
+                case 47:
+                    switch (yytok) {
+                        case '|':
+                            yyn = 11;
+                            continue;
+                        case ')':
+                            yyn = 23;
+                            continue;
+                    }
+                    yyn = 55;
                     continue;
 
                 case 22:
@@ -464,35 +469,26 @@ class RegexParser extends ParserBase implements RegexTokens {
                     if (++yysp>=yyst.length) {
                         yyexpand();
                     }
-                case 47:
+                case 48:
                     switch (yytok) {
-                        case ':':
-                        case error:
-                            yyn = 53;
+                        case BACKREF:
+                            yyn = 6;
+                            continue;
+                        case CHAR:
+                            yyn = 7;
+                            continue;
+                        case '(':
+                            yyn = 8;
+                            continue;
+                        case '.':
+                            yyn = 9;
                             continue;
                     }
-                    yyn = yyr15();
+                    yyn = 55;
                     continue;
 
                 case 23:
                     yyst[yysp] = 23;
-                    if (++yysp>=yyst.length) {
-                        yyexpand();
-                    }
-                case 48:
-                    switch (yytok) {
-                        case '|':
-                            yyn = 10;
-                            continue;
-                        case ')':
-                            yyn = 24;
-                            continue;
-                    }
-                    yyn = 53;
-                    continue;
-
-                case 24:
-                    yyst[yysp] = 24;
                     yysv[yysp] = (lexer.getSemantic()
                                  );
                     yytok = (lexer.nextToken()
@@ -502,21 +498,57 @@ class RegexParser extends ParserBase implements RegexTokens {
                     }
                 case 49:
                     switch (yytok) {
-                        case ':':
                         case error:
-                            yyn = 53;
+                        case ':':
+                            yyn = 55;
+                            continue;
+                    }
+                    yyn = yyr15();
+                    continue;
+
+                case 24:
+                    yyst[yysp] = 24;
+                    if (++yysp>=yyst.length) {
+                        yyexpand();
+                    }
+                case 50:
+                    switch (yytok) {
+                        case '|':
+                            yyn = 11;
+                            continue;
+                        case ')':
+                            yyn = 25;
+                            continue;
+                    }
+                    yyn = 55;
+                    continue;
+
+                case 25:
+                    yyst[yysp] = 25;
+                    yysv[yysp] = (lexer.getSemantic()
+                                 );
+                    yytok = (lexer.nextToken()
+                            );
+                    if (++yysp>=yyst.length) {
+                        yyexpand();
+                    }
+                case 51:
+                    switch (yytok) {
+                        case error:
+                        case ':':
+                            yyn = 55;
                             continue;
                     }
                     yyn = yyr16();
                     continue;
 
-                case 50:
-                    return true;
-                case 51:
-                    yyerror("stack overflow");
                 case 52:
-                    return false;
+                    return true;
                 case 53:
+                    yyerror("stack overflow");
+                case 54:
+                    return false;
+                case 55:
                     yyerror("syntax error");
                     return false;
             }
@@ -536,34 +568,38 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yys2() {
         switch (yytok) {
-            case CHAR:
+            case BACKREF:
                 return 6;
-            case '(':
+            case CHAR:
                 return 7;
-            case '.':
+            case '(':
                 return 8;
+            case '.':
+                return 9;
             case ENDINPUT:
             case '|':
             case ')':
                 return yyr3();
         }
-        return 53;
+        return 55;
     }
 
-    private int yys16() {
+    private int yys17() {
         switch (yytok) {
-            case CHAR:
+            case BACKREF:
                 return 6;
-            case '(':
+            case CHAR:
                 return 7;
-            case '.':
+            case '(':
                 return 8;
+            case '.':
+                return 9;
             case ENDINPUT:
             case '|':
             case ')':
                 return yyr4();
         }
-        return 53;
+        return 55;
     }
 
     private int yyr1() { // line : /* empty */
@@ -600,7 +636,7 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yypconcat() {
         switch (yyst[yysp-1]) {
-            case 10: return 16;
+            case 11: return 17;
             default: return 2;
         }
     }
@@ -608,7 +644,7 @@ class RegexParser extends ParserBase implements RegexTokens {
     private int yyr14() { // count : /* empty */
         { yyrv = ++nparen; }
         yysv[yysp-=0] = yyrv;
-        return 14;
+        return 15;
     }
 
     private int yyr3() { // alt : concat
@@ -627,9 +663,9 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yypalt() {
         switch (yyst[yysp-1]) {
-            case 14: return 20;
+            case 15: return 21;
             case 0: return 3;
-            default: return 23;
+            default: return 24;
         }
     }
 
@@ -698,8 +734,8 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yyprepeat() {
         switch (yyst[yysp-1]) {
-            case 16: return 9;
-            case 2: return 9;
+            case 17: return 10;
+            case 2: return 10;
             default: return 4;
         }
     }
@@ -732,6 +768,15 @@ class RegexParser extends ParserBase implements RegexTokens {
     private int yyr18() { // single : '.'
         {
         State s = State.makeDot(id++);
+        yyrv = new Frag(s, s.out);
+    }
+        yysv[yysp-=1] = yyrv;
+        return 5;
+    }
+
+    private int yyr19() { // single : BACKREF
+        {
+        State s = State.makeBackref(id++, ((Integer)yysv[yysp-1]));
         yyrv = new Frag(s, s.out);
     }
         yysv[yysp-=1] = yyrv;

@@ -7,6 +7,7 @@ import java.util.List;
 
 public class RegexLexer implements RegexTokens {
     
+    
     private final List<LexToken> tokens;
     private int index = 0;
     
@@ -60,9 +61,10 @@ public class RegexLexer implements RegexTokens {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (c == '\\') {
-//                int digit = Integer.parseInt("" + input.charAt(++i));
-//                ret.add(new Token(BACKREF, digit));
-                throw new UnsupportedOperationException("backrefs not handled");
+                checkLex(++i < input.length(), "dangling \\");
+                int digit = Integer.parseInt("" + input.charAt(i));
+                checkLex(digit >= 1 && digit <= 9, "backref out of range: %s", digit);
+                ret.add(new LexToken(BACKREF, digit));
             } else if ("()*+.:?|".indexOf(c) != -1) {
                 ret.add(new LexToken(c, null));
             } else if (Character.toString(c).matches("[a-zA-Z]")) {
@@ -79,5 +81,18 @@ public class RegexLexer implements RegexTokens {
     public String toString() {
         return "[" + getClass().getSimpleName() + " tokens=" + tokens + "]";
     }
+    
+    private static void checkLex(boolean condition, String fmtstring, Object... fmtargs) {
+        if (!condition) {
+            throw new LexerException(String.format(fmtstring, fmtargs));
+        }
+    }
 
+    public static class LexerException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+        
+        public LexerException(String message) {
+            super(message);
+        }
+    }
 }

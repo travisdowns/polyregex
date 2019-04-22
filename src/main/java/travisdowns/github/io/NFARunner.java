@@ -18,38 +18,35 @@ import com.google.common.base.Joiner;
 public class NFARunner {
 
     private class StateList {
-        final ArrayList<State> list;
-        final Set<Integer> ids;
+        final Set<State> stateSet;
 
         public StateList() {
-            this.list = new ArrayList<>();
-            this.ids = new HashSet<>();
+            this.stateSet = new HashSet<>();
         }
 
         /* Add s to l, following unlabeled arrows. */
         void addstate(State s) {
             checkNotNull(s);
-            if (!ids.contains(s.id)) {
-                ids.add(s.id);
+            if (stateSet.add(s)) {
                 if (s.type == State.Type.SPLIT) {
                     /* follow unlabeled arrows */
                     addstate(s.out.s);
                     addstate(s.out1.s);
                 } else {
                     checkState(!s.isParen(), "this runner doesn't support parens");
-                    list.add(s);
+                    stateSet.add(s);
                 }
             }
         }
 
         /* Check whether state list contains a match. */
         boolean ismatch() {
-            return list.stream().anyMatch(s -> s == State.MATCHSTATE);
+            return stateSet.stream().anyMatch(s -> s == State.MATCHSTATE);
         }
 
         @Override
         public String toString() {
-            return Joiner.on(", ").join(list);
+            return Joiner.on(", ").join(stateSet);
         }
     }
     /*
@@ -74,7 +71,7 @@ public class NFARunner {
      */
     private StateList step(StateList clist, int c) {
         StateList nlist = new StateList();
-        for (State s : clist.list) {
+        for (State s : clist.stateSet) {
             if (s.type == State.Type.ANY || (s.type == State.Type.CHAR && s.c == c)) {
                 nlist.addstate(s.out.s);
             }

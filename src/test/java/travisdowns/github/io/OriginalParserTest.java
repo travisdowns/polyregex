@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ParserTest {
+public class OriginalParserTest {
     
 	public static String postfixStr(String input) {
 		List<Token> postfix = Parser.toPostfix(input);

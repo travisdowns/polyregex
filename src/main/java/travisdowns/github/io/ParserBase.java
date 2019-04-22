@@ -11,12 +11,23 @@ import travisdowns.github.io.State.StateRef;
 public class ParserBase {
     
     protected final RegexLexer lexer;
-    int id = 1; // unique id for state objects (note that id == 0 is reserved for matchstate)
-    int nparen; // number of parenthesized groups
+    int nparen; // number of captured parenthesized groups
     State start; // the first state, populated at the end of parsing
     
     public ParserBase(String input) {
         this.lexer = new RegexLexer(input);
+    }
+    
+    /**
+     * Convenience method that calls parse on the parser, checks errors and returns the initial State
+     * object.
+     *  
+     * @return the initial State object for the NFA
+     */
+    public static State doParse(String pattern) {
+        RegexParser parser = new RegexParser(pattern);
+        checkState(parser.parse(), "parse() returned false");
+        return parser.start;
     }
     
     /* Patch the list of states at out to point to start. */
