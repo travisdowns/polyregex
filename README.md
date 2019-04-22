@@ -1,5 +1,5 @@
-A really slow regex matcher, which supports backrefences in [polynomial time](https://en.wikipedia.org/wiki/P_(complexity)) in the 
-size of the input _text_, for a fixed number of backreferences. That is, varying only the input size, not the pattern<sup>1</sup> the 
+A really slow regex matcher, which supports backrefences in [polynomial time](https://en.wikipedia.org/wiki/P_(complexity)) _in the 
+size of the input text_ for a fixed number of backreferences in the pattern. That is, varying only the input size, not the pattern<sup>1</sup> the 
 running time will be in poly time. In fact, since like many engines, since only 9 backreferences (`\1` through `\9`) are supported, we
 can say that this engine is _always_ runs in P due to the cap on the number of backreferences.  
 
