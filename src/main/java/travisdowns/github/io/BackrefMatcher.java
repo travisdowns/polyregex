@@ -228,13 +228,13 @@ public class BackrefMatcher implements Matcher {
     BackrefMatcher(State start) {
         this.start = start;
         List<State> allStates = State.allStates(start);
-        System.out.println("Got " + allStates.size() + " total states");
+//        System.out.println("Got " + allStates.size() + " total states");
         int groupCount = (int)allStates.stream().filter(s -> s.type == Type.LPAREN).count();
         if (allStates.get(0).type == Type.LPAREN) {
             groupCount--; // don't count outer \0 group
         }
         this.groupCount = groupCount;
-        System.out.println("Got " + groupCount + " unique captured groups");
+//        System.out.println("Got " + groupCount + " unique captured groups");
         State.assignIds(start);
     }
 
