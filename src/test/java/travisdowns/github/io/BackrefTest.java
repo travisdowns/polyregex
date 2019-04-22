@@ -1,6 +1,6 @@
 package travisdowns.github.io;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -47,8 +47,45 @@ public class BackrefTest {
 
 	@Test
 	public void testBackrefSimple() {
-//		assertTrue(matches("(a)\\1", "aa"));
-//		assertTrue(matches("(a)\\1", "ab"));
+		assertTrue (matches("(a)\\1", "aa"));
+		assertFalse(matches("(a)\\1", "ab"));
 	}
+	
+	@Test
+	public void testBackrefHarder() {
+	    assertTrue (matches("(...)\\1", "aaaaaa"));
+	    assertTrue (matches("(...)\\1", "abaaba"));
+	    assertTrue (matches("(...).\\1", "abacaba"));
+	}
+	
+	@Test
+    public void testRepeatedBackrefs() {
+	    assertTrue (matches("(.*)\\1", ""));
+        assertTrue (matches("(.*)\\1", "aa"));
+        assertFalse(matches("(.*)\\1", "aaa"));
+        assertTrue (matches("(.*)\\1", "aaaa"));
+        
+        assertTrue (matches("(.*)\\1\\1", ""));
+        assertFalse(matches("(.*)\\1\\1", "a"));
+        assertFalse(matches("(.*)\\1\\1", "aa"));
+        assertTrue (matches("(.*)\\1\\1", "aaa"));
+        assertFalse(matches("(.*)\\1\\1", "aaaa"));
+        
+        assertTrue (matches("(.*)\\1*", ""));
+        assertTrue (matches("(.*)\\1*", "a"));
+        assertTrue (matches("(.*)\\1*", "abcdef"));
+        
+        assertTrue (matches("(.*)\\1+", ""));
+        assertFalse(matches("(.*)\\1+", "a"));
+        assertTrue (matches("(.*)\\1+", "aa"));
+        assertTrue (matches("(.*)\\1+", "aaa"));
+        assertTrue (matches("(.*)\\1+", "aaabaaabaaab"));
+        assertTrue (matches("(.*)\\1+", "aaabaaabaaabxaaabaaabaaabx"));
+//        assertTrue (matches("(.*)\\1+", "abcdef"));
+        
+        assertFalse(matches("(.*)\\1", "ab"));
+    }
+	
+	
 
 }

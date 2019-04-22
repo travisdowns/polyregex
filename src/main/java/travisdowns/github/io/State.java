@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class State {
     /* indirection to allow state pointers to be recorded and updated in fragments */
@@ -22,9 +23,10 @@ public class State {
     public static State MATCHSTATE = new State(Type.MATCH, 0);
 
     enum Type {
-        CHAR, ANY, SPLIT, MATCH, LPAREN, RPAREN, BACKREF, FORWARD, INVALID;
+        CHAR, ANY, SPLIT, MATCH, LPAREN, RPAREN, BACKREF, FORWARD, INVALID, MATCHNOTHING;
     }
 
+    int id;
     int c;
     final Type type;
     StateRef out;
@@ -32,6 +34,11 @@ public class State {
 
     private State(State.Type type, int id) {
         this.type = type;
+        this.id = id;
+    }
+    
+    private State(State.Type type) {
+        this(type, -1);
     }
 
     /**
@@ -43,6 +50,7 @@ public class State {
     public State(State s) {
         this.type = s.type;
         this.c = s.c;
+        this.id = s.id;
         if (s.out != null) {
             this.out = new StateRef(s.out.s);
         }
@@ -71,45 +79,51 @@ public class State {
     }
 
     /** make a State with a data and a single dangling out pointer */
-    private static State makeWithData(Type type, int id, int data) {
-        State s = new State(type, id);
+    private static State makeWithData(Type type, int data) {
+        State s = new State(type);
         s.c = data;
         s.out = new StateRef(null);
         return s;
     }
 
     /** like {@link #makeWithData(Type, int, int)} but without data */
+    private static State makeNoData(Type type) {
+        return makeWithData(type, 0);
+    }
+
     private static State makeNoData(Type type, int id) {
-        return makeWithData(type, id, 0);
+        State s = makeNoData(type);
+        s.id = id;
+        return s;
     }
 
-    public static State makeChar(int id, char c) {
-        return makeWithData(Type.CHAR, id, c);
+    public static State makeChar(char c) {
+        return makeWithData(Type.CHAR, c);
     }
 
-    public static State makeDot(int id) {
-        return makeNoData(Type.ANY, id);
+    public static State makeDot() {
+        return makeNoData(Type.ANY);
     }
 
-    public static State makeSplit(int id, State out, State out1) {
-        State s = new State(Type.SPLIT, id);
+    public static State makeSplit(State out, State out1) {
+        State s = new State(Type.SPLIT);
         s.out = new StateRef(out);
         s.out1 = new StateRef(out1);
         return s;
     }
 
-    public static State makeLParen(int id, int parenIdx, State out) {
-        State s = makeWithData(Type.LPAREN, id, parenIdx);
+    public static State makeLParen(int parenIdx, State out) {
+        State s = makeWithData(Type.LPAREN, parenIdx);
         s.out = new StateRef(out);
         return s;
     }
 
-    public static State makeRParen(int id, int parenIdx) {
-        return makeWithData(Type.RPAREN, id, parenIdx);
+    public static State makeRParen(int parenIdx) {
+        return makeWithData(Type.RPAREN, parenIdx);
     }
 
-    public static State makeBackref(int id, int backrefIdx) {
-        return makeWithData(Type.BACKREF, id, backrefIdx);
+    public static State makeBackref(int backrefIdx) {
+        return makeWithData(Type.BACKREF, backrefIdx);
     }
 
     @Override
@@ -132,15 +146,27 @@ public class State {
         case RPAREN:
             return ")";
         default:
-            return "Unhandled State, type = " + type;
+            return type.toString();
         }
     }
 
     /** return a list of all states reachable from the current state */
-    public static List<State> allStates(State s) {
-        LinkedHashSet<State> all = new LinkedHashSet<>();
+    public static <T extends State> List<T> allStates(T s) {
+        LinkedHashSet<T> all = new LinkedHashSet<>();
         allStatesHelper(s, all);
         return new ArrayList<>(all);
+    }
+    
+    /** assigns IDs starting from 1 to all the states reachable from s */
+    public static void assignIds(State start) {
+        List<State> states = allStates(start);
+        checkState(states.get(0) == start);
+        int id = 1;
+        for (State s : states) {
+            if (s != State.MATCHSTATE) {
+                s.id = id++;
+            }
+        }
     }
     
     /**
@@ -149,15 +175,15 @@ public class State {
      * @param s
      * @return a new graph with the same stucture and nodes, independent of the original graph
      */
-    public static State cloneGraph(State start) {
+    public static <T extends State> T cloneGraph(State start, Function<State, T> cloner) {
         List<State> original = allStates(start);
         checkState(original.get(0) == start);
-        List<State> clonedList = new ArrayList<>(original.size());
+        List<T> clonedList = new ArrayList<>(original.size());
         HashMap<State, State> oldToNew = new HashMap<>(original.size());
         // create a clone of all states, but the references in the cloned list will still
         // point to the original
         for (State s : original) {
-            State clone = new State(s);
+            T clone = cloner.apply(s);
             clonedList.add(clone);
             oldToNew.put(s, clone);
         }
@@ -176,7 +202,7 @@ public class State {
      * @param completeMapping if true, the map is assumed to contain a mapping for every referenced node,
      * and an error is thrown if not present - otherwise, the mapping may be partial
      */
-    private static void replaceNodes(List<State> list, Map<State, State> oldToNew, boolean completeMapping) {
+    private static void replaceNodes(List<? extends State> list, Map<State, State> oldToNew, boolean completeMapping) {
         for (State s : list) {
             fixup(s.out,  oldToNew, completeMapping);
             fixup(s.out1, oldToNew, completeMapping);
@@ -188,9 +214,9 @@ public class State {
      * a series of CHAR nodes based on the actual characters in the input string with the given
      * start/stop indices.
      */
-    public static void expandBackrefs(State start, String text, int[] cStarts, int cEnds[]) {
+    public static void expandBackrefs(State start, String text, CaptureState capstate,
+            Function<State, ? extends State> cloner) {
         checkArgument(start.type != Type.BACKREF); // first node cannot be a backref
-        checkArgument(cStarts.length == cEnds.length);
         
         List<State> allStates = allStates(start);
         Map<State, State> oldToNew = new HashMap<>();
@@ -199,8 +225,9 @@ public class State {
             if (s.type == Type.BACKREF) {
                 checkState(s.outRefs() == 1);
                 int refidx = s.c;
-                checkState(refidx < cStarts.length);
-                List<State> charSeries = makeStringMatcher(text, cStarts[refidx], cEnds[refidx]);
+                checkState(refidx <= capstate.size());
+                List<State> charSeries = makeStringMatcher(s.id, text, capstate.start(refidx),
+                        capstate.end(refidx), cloner);
                 charSeries.get(charSeries.size() - 1).out = s.out;
                 oldToNew.put(s, charSeries.get(0));
             }
@@ -213,21 +240,30 @@ public class State {
         checkState(!newStates.stream().anyMatch(s -> s.type == Type.BACKREF)); // no more backrefs!
     }
     
-    private static List<State> makeStringMatcher(String text, int start, int end) {
-        checkState(start < text.length());
+    private static List<State> makeStringMatcher(int id, String text, int start, int end,
+            Function<State, ? extends State> cloner) {
+        checkState(start <= text.length());
         checkState(end <= text.length());
-        checkState(start <= end);
-        
-        // empty match, just return a FORWARD node
-        if (start == end) {
-            return Collections.singletonList(State.makeNoData(Type.FORWARD, 0));
+
+        if ((start == -1 && end != -1) || (start > end)) {
+            // not possible
+            return Collections.singletonList(cloner.apply(State.makeNoData(Type.INVALID, id)));
         }
         
+        if (end == -1) {
+            // group hasn't been captured yet - note that if start != -1 we have a nested backref and
+            // may want to handle those differently
+            return Collections.singletonList(cloner.apply(State.makeNoData(Type.MATCHNOTHING, id)));
+        }
+        
+        // the list of nodes matching the backref always starts with a FORWARD node which does nothing
+        // but forward to the first matching node, but preserves the ID of the backref node
         List<State> ret = new ArrayList<>(end - start);
-        State previous = null;
+        State previous = cloner.apply(State.makeNoData(Type.FORWARD, id));
+        ret.add(previous);
         for (int i = start; i < end; i++) {
             char c = text.charAt(i);
-            State s = State.makeChar(0, c);
+            State s = cloner.apply(State.makeChar(c));
             if (previous != null) {
                 previous.out = new StateRef(s);
             }
@@ -237,6 +273,7 @@ public class State {
         
         return ret;
     }
+
 
     /**
      * For the given reference, if not null, replace the existing reference 
@@ -254,13 +291,14 @@ public class State {
         }
     }
 
-    private static void allStatesHelper(State s, LinkedHashSet<State> all) {
+    @SuppressWarnings("unchecked")
+    private static <T extends State> void allStatesHelper(T s, LinkedHashSet<T> all) {
         if (!all.contains(s)) {
             all.add(s);
             if (s.out != null) {
-                allStatesHelper(s.out.s, all);
+                allStatesHelper((T)s.out.s, all);
                 if (s.out1 != null) {
-                    allStatesHelper(s.out1.s, all);
+                    allStatesHelper((T)s.out1.s, all);
                 }
             } else {
                 checkState(s.out1 == null);  // out1 can't be set if out isn't

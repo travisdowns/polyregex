@@ -54,7 +54,8 @@ public class StateTest {
 
     private void checkBackrefMatch(String pattern, String text, int i, int j) {
         State start = stateFor(pattern);
-        State.expandBackrefs(start, text, new int[]{-1, i}, new int[]{-1, j});
+        State.expandBackrefs(start, text,
+                new CaptureState(new int[]{i}, new int[]{j}, text.length()), State::new);
         assertTrue(new BackrefMatcher(start).matches(text));
     }
     
@@ -84,7 +85,7 @@ public class StateTest {
     
     private void cloneGraphTest(String pattern) {
         State start  = stateFor(pattern);
-        State cloned = State.cloneGraph(start);
+        State cloned = State.cloneGraph(start, s -> new State(s));
         
         // do a recursive reflective equals, which checks that they graphs are equal, reflective
         // means that StateRef references will be considered equal if their corresponding pointees

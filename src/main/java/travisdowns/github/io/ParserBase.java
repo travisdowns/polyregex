@@ -52,8 +52,8 @@ public class ParserBase {
     
     Frag paren(Frag f, int n)
     {
-        State s1 = State.makeLParen(id++, n, f.start);
-        State s2 = State.makeRParen(id++, n);
+        State s1 = State.makeLParen(n, f.start);
+        State s2 = State.makeRParen(n);
         patch(f.out, s2);
         return new Frag(s1, s2.out);
     }

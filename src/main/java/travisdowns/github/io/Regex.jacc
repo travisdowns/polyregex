@@ -8,10 +8,11 @@
 %extends ParserBase
 
 
-%token  <Character> CHAR
+%token <Character> CHAR
+%token <Integer> BACKREF  
 
-%type   <Frag>  alt concat repeat single line
-%type   <Integer>    count
+%type <Frag>  alt concat repeat single line
+%type <Integer>    count
 
 %%
 
@@ -31,7 +32,7 @@ alt:
     concat
 |   alt '|' concat
     {
-        State s = State.makeSplit(id++, $1.start, $3.start);
+        State s = State.makeSplit($1.start, $3.start);
         $$ = new Frag(s, append($1.out, $3.out));
     }
 ;
@@ -49,36 +50,36 @@ repeat:
     single
 |   single '*'
     {
-        State s = State.makeSplit(id++, $1.start, null);
+        State s = State.makeSplit($1.start, null);
         patch($1.out, s);
         $$ = new Frag(s, s.out1);
     }
 |   single '*' '?'
     {
-        State s = State.makeSplit(id++, null, $1.start);
+        State s = State.makeSplit(null, $1.start);
         patch($1.out, s);
         $$ = new Frag(s, s.out1);
     }
 |   single '+'
     {
-        State s = State.makeSplit(id++, $1.start, null);
+        State s = State.makeSplit($1.start, null);
         patch($1.out, s);
         $$ = new Frag($1.start, s.out1);
     }
 |   single '+' '?'
     {
-        State s = State.makeSplit(id++, null, $1.start);
+        State s = State.makeSplit(null, $1.start);
         patch($1.out, s);
         $$ = new Frag($1.start, s.out);
     }
 |   single '?'
     {
-        State s = State.makeSplit(id++, $1.start, null);
+        State s = State.makeSplit($1.start, null);
         $$ = new Frag(s, append($1.out, s.out1));
     }
 |   single '?' '?'
     {
-        State s = State.makeSplit(id++, null, $1.start);
+        State s = State.makeSplit(null, $1.start);
         $$ = new Frag(s, append($1.out, s.out));
     }
 ;
@@ -96,12 +97,17 @@ single:
     }
 |   CHAR
     {
-        State s = State.makeChar(id++, $1);
+        State s = State.makeChar($1);
         $$ = new Frag(s, s.out);
     }
 |   '.'
     {
-        State s = State.makeDot(id++);
+        State s = State.makeDot();
+        $$ = new Frag(s, s.out);
+    }
+|   BACKREF
+    {
+        State s = State.makeBackref($1);
         $$ = new Frag(s, s.out);
     }
 ;

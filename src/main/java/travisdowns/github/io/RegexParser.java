@@ -1,4 +1,4 @@
-// Output created by jacc on Sat Apr 20 22:23:29 COT 2019
+// Output created by jacc on Sun Apr 21 19:04:56 COT 2019
 
 package travisdowns.github.io;
 
@@ -654,7 +654,7 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yyr4() { // alt : alt '|' concat
         {
-        State s = State.makeSplit(id++, ((Frag)yysv[yysp-3]).start, ((Frag)yysv[yysp-1]).start);
+        State s = State.makeSplit(((Frag)yysv[yysp-3]).start, ((Frag)yysv[yysp-1]).start);
         yyrv = new Frag(s, append(((Frag)yysv[yysp-3]).out, ((Frag)yysv[yysp-1]).out));
     }
         yysv[yysp-=3] = yyrv;
@@ -676,7 +676,7 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yyr8() { // repeat : single '*'
         {
-        State s = State.makeSplit(id++, ((Frag)yysv[yysp-2]).start, null);
+        State s = State.makeSplit(((Frag)yysv[yysp-2]).start, null);
         patch(((Frag)yysv[yysp-2]).out, s);
         yyrv = new Frag(s, s.out1);
     }
@@ -686,7 +686,7 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yyr9() { // repeat : single '*' '?'
         {
-        State s = State.makeSplit(id++, null, ((Frag)yysv[yysp-3]).start);
+        State s = State.makeSplit(null, ((Frag)yysv[yysp-3]).start);
         patch(((Frag)yysv[yysp-3]).out, s);
         yyrv = new Frag(s, s.out1);
     }
@@ -696,7 +696,7 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yyr10() { // repeat : single '+'
         {
-        State s = State.makeSplit(id++, ((Frag)yysv[yysp-2]).start, null);
+        State s = State.makeSplit(((Frag)yysv[yysp-2]).start, null);
         patch(((Frag)yysv[yysp-2]).out, s);
         yyrv = new Frag(((Frag)yysv[yysp-2]).start, s.out1);
     }
@@ -706,7 +706,7 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yyr11() { // repeat : single '+' '?'
         {
-        State s = State.makeSplit(id++, null, ((Frag)yysv[yysp-3]).start);
+        State s = State.makeSplit(null, ((Frag)yysv[yysp-3]).start);
         patch(((Frag)yysv[yysp-3]).out, s);
         yyrv = new Frag(((Frag)yysv[yysp-3]).start, s.out);
     }
@@ -716,7 +716,7 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yyr12() { // repeat : single '?'
         {
-        State s = State.makeSplit(id++, ((Frag)yysv[yysp-2]).start, null);
+        State s = State.makeSplit(((Frag)yysv[yysp-2]).start, null);
         yyrv = new Frag(s, append(((Frag)yysv[yysp-2]).out, s.out1));
     }
         yysv[yysp-=2] = yyrv;
@@ -725,7 +725,7 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yyr13() { // repeat : single '?' '?'
         {
-        State s = State.makeSplit(id++, null, ((Frag)yysv[yysp-3]).start);
+        State s = State.makeSplit(null, ((Frag)yysv[yysp-3]).start);
         yyrv = new Frag(s, append(((Frag)yysv[yysp-3]).out, s.out));
     }
         yysv[yysp-=3] = yyrv;
@@ -758,7 +758,7 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yyr17() { // single : CHAR
         {
-        State s = State.makeChar(id++, ((Character)yysv[yysp-1]));
+        State s = State.makeChar(((Character)yysv[yysp-1]));
         yyrv = new Frag(s, s.out);
     }
         yysv[yysp-=1] = yyrv;
@@ -767,7 +767,7 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yyr18() { // single : '.'
         {
-        State s = State.makeDot(id++);
+        State s = State.makeDot();
         yyrv = new Frag(s, s.out);
     }
         yysv[yysp-=1] = yyrv;
@@ -776,7 +776,7 @@ class RegexParser extends ParserBase implements RegexTokens {
 
     private int yyr19() { // single : BACKREF
         {
-        State s = State.makeBackref(id++, ((Integer)yysv[yysp-1]));
+        State s = State.makeBackref(((Integer)yysv[yysp-1]));
         yyrv = new Frag(s, s.out);
     }
         yysv[yysp-=1] = yyrv;
