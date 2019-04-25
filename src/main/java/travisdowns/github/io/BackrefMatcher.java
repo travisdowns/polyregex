@@ -15,10 +15,14 @@ import travisdowns.github.io.State.Type;
 
 
 public class BackrefMatcher implements Matcher {
+    
+    private static final boolean IS_EAGER = Boolean.getBoolean("BackrefMatcher.eager");
 
     private final State start;
     /** number of captured groups referenced by a backref (i.e., "unique backrefs") */
     private final int groupCount;
+    /** if true, all the possible subFNA groups are calculated before matching even starts, really slow */ 
+    private final boolean isEager;
 
     /** instance of this class created for each match request, depends on the length of the input string */
     class BackrefRunner {
@@ -26,8 +30,13 @@ public class BackrefMatcher implements Matcher {
         final String text;
         private final Map<CaptureState, SubNFA> capToSub = new HashMap<>();
 
-        SubNFA getSub(CaptureState state) {
-            return capToSub.get(state);
+        SubNFA getSub(CaptureState capstate) {
+            SubNFA ret = capToSub.get(capstate);
+            if (ret == null) {
+                checkState(!isEager, "sub for capstate not found in eager mode: %s", capstate);
+                ret = new SubNFA(start, capstate);
+            }
+            return ret;
         }
 
         /**
@@ -167,10 +176,12 @@ public class BackrefMatcher implements Matcher {
         public BackrefRunner(String text) {
             this.text = text;
 
-            // build the SubNFA list greedily
-            int[] starts = new int[groupCount];
-            int[]   ends = new int[groupCount];
-            buildSubNFAs(0, starts, ends);
+            if (isEager) {
+                // build the SubNFA list eagerly
+                int[] starts = new int[groupCount];
+                int[]   ends = new int[groupCount];
+                buildSubNFAs(0, starts, ends);
+            }
         }
 
         private void buildSubNFAs(int groupIdx, int[] starts, int[] ends) {
@@ -222,11 +233,18 @@ public class BackrefMatcher implements Matcher {
     }
 
     public BackrefMatcher(String pattern) {
-        this(ParserBase.doParse(pattern));
+        // use the default IS_EAGER state, which can be set on the command line
+        // with -DBackrefMatcher.isEager=true|flase
+        this(pattern, IS_EAGER);
     }
 
-    BackrefMatcher(State start) {
+    public BackrefMatcher(String pattern, boolean isEager) {
+        this(ParserBase.doParse(pattern), isEager);
+    }
+    
+    BackrefMatcher(State start, boolean isEager) {
         this.start = start;
+        this.isEager = isEager;
         List<State> allStates = State.allStates(start);
 //        System.out.println("Got " + allStates.size() + " total states");
         int groupCount = (int)allStates.stream().filter(s -> s.type == Type.LPAREN).count();

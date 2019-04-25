@@ -1,7 +1,5 @@
 package travisdowns.github.io;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.ArrayList;
 import java.util.List;
 

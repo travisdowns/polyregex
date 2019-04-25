@@ -3,7 +3,6 @@ package travisdowns.github.io;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.function.Function;
 
@@ -13,33 +12,32 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 
 @RunWith(Parameterized.class)
 public class MatcherTest {
     
     @Parameters(name = "{0}")
-    public static List<Class<?>[]> getMatcherFactories() {
+    public static List<Object[]> getMatcherFactories() {
         return ImmutableList.of(
-                new Class<?>[]{ OriginalMatcher.class },
-                new Class<?>[]{ BackrefMatcher.class }
+                params("Original",      s -> new OriginalMatcher(s)),
+                params("Backref-lazy",  s -> new BackrefMatcher(s, false)), // lazy  subNFA creation
+                params("Backref-eager", s -> new BackrefMatcher(s, true))   // eager subNFA creation
                 );
     }
     
-    @Parameter
-    public Class<? extends Matcher> matcherClass;
+    private static Object[] params(String name, Function<String, Matcher> f) {
+        return new Object[]{name, f};
+    }
+    
+    @Parameter(0)
+    public String name;
+    
+    @Parameter(1)
+    public Function<String, Matcher> matcherFactory;
     
     Matcher matcherFor(String pattern) {
-        try {
-            return matcherClass.getConstructor(String.class).newInstance(pattern);
-        } catch (InvocationTargetException e) {
-            Throwables.throwIfUnchecked(e.getCause());
-            throw new RuntimeException(e.getCause());
-        } catch (Exception e) {
-            Throwables.throwIfUnchecked(e);
-            throw new RuntimeException(e);
-        }
+        return matcherFactory.apply(pattern);
     }
     
     boolean matches(String pattern, String text) {
@@ -112,8 +110,7 @@ public class MatcherTest {
 		assertTrue (matches("(ab)*", "ab"));
 		assertTrue (matches("(ab)*", "ababab"));
 		assertTrue (matches("(ab)*(cdef)*",    "abababcdefcdef"));
-		if (matcherClass != BackrefMatcher.class) {
-		    // too slow with BR matcher
+		if (!name.equals("Backref-eager")) { // too slow with BR eager matcher
 		    assertTrue (matches("((ab)*(cdef)*)*", "abababcdefcdefababcdef"));		    
 		}
 	}
