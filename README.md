@@ -5,17 +5,17 @@ can say that this engine is _always_ runs in P due to the cap on the number of b
 
 The basic idea is to duplicate the underlying backreference-unaware NFA for all combinations of start/stop points in the 
 input for every captured group. If there are k captured groups, that's O(n^2k) which is a polynomial number of NFAs. Since the
-underlying NFA simulation process is also polynomial. Ultimately we get a bound of `O(n^(2k+2))` time and `O(n^(2k+2))` space. So for the full complement of 9 backreferences, that's `O(n^20)` time and `O(n^19)` space - not fast either theoretically or actually.
+underlying NFA simulation process is also polynomial. Ultimately we get a bound of `O(n^(2k+2))` time and `O(n^(2k+2))` space. So for the full complement of 9 backreferences, that's `O(n^20)` time and `O(n^19)` space - not fast either theoretically or actually. A derivation of the order based on the code is found below. 
 
 This is intended entirely as a proof of concept to make it easily to verify by implementation the original proof
-sketch - it is not a practical implementation at all. It is very slow and uses many GB of memory to parse even relatively
+sketch - it is not a practical implementation at all. It is very slow and especially the "eager" moder uses many GB of memory to parse even relatively
 simple expressions with a few captured groups. If you want to implement a poly time (under  the definition above) regex engine
 that handles backreferences, don't do it like this. Do it with backtracking with memoization or perhaps psuedo-NFA simulation with
 an expanded and dynamic state space that includes capture information in the state.
 
 Russ Cox's [regex resources](https://swtch.com/~rsc/regexp/) were invaluable in understanding how to handle NFA similuation and other concerns.
 
-## Proof Sketch
+## Complexity Proof Sketch
 
 Here's proof sketch for this particular Java implementation operating in polynomial time (in the sense given above).
 
@@ -52,6 +52,24 @@ Next, we examine the operation of `BackrefRunner.matches()`. We omit the analysi
 The `step()` call occurs in a loop, called once for each of the `n` characters in the input. Each `step()` call iterates over the current state list (`clist` in the code), whose size is bounded by `t`. Each iteration may call `addstate()` which adds new reachable states to `nlist`, the state list for the next step. Considering as a whole all the `addstate()` calls<sup>3</sup>, they do at most `O(t)` work since the `O(1)` body of the method executes once every time a state is added to the `StateList.visited` set, and this set can have at most `O(t)` elements (the total number of states). 
 
 Now then we have the total work: `n` calls to `step()` each of which take `O(t)` work, for `O(n*t)` total work. Total space is `O(t)`, i.e., the total number of states. Expanding out `t`, we get  `O(m*n^(2k+1) + b*n^(2k+2)` work and `O(m*n^2k + b*n^(2k+1)` space. Under the assumption that `b`, `k` are fixed constants and that the size of the input `n` is not "much smaller" than the size of the regex `m`<sup>4</sup>, only the last term remains and it simplifies to `O(n^(2k+2))` time and `O(n^(2k+1))` space.
+
+## More Practical Solutions
+
+As mentioned several times above, the current implementaiton is not meant to be a practical one. A practical solution might look something like one of these two ideas:
+
+### NFA With Additional State
+
+This is the closest to the existing solution. The solution in this repository still encodes all the information for each state as a single `StateEx` pointer, which means that you need to massively duplicate states (all the `SubNFA` objects), which is a big waste of time and memory (indeed, many of the created states may never be reachable). This lets the `step()` state transition function basically work like a traditional NFA simulation, which is the most familiar and makes the proof easy.
+
+Another approach, however, would be not to duplicate any NFA nodes, but to augment each state object with the necessarily extra information to carry along capture related information. The transitions would use the base NFA, but there could be multiple states pointing to the same NFA node, which differ in their capture information and each one would be transitioned separately. Matching backreference instances could be accomodated not by "expanding" the NFA nodes as in the current solution, but by tracking state that indicates, when the state is matching a backreference, how many of the backreference characters have been matched so far. Each `step()` would try to transition the state by matching the next character, or finally leaving the backreference match node if all characters have been matched.
+
+I think this would achieve the same or better bound as the current solution, more efficiently.
+
+### Backtracking with memoizing
+
+In principle, I think a backtracking implementation, which is generally simpler all-around, could also achieve running time in P if memorized all the states it had seen, since repeated visiting of identical states is ultimately behind exponential blowup. Some care would have to be given not to use excessive space, however, since a naive implementation would save more states than an NFA simulation based approach since it doesn't visit every character one-by-one, so states earlier in the string may be saved that can never be accessed.
+
+Russ Cox metnions that Perl 5 regular expressions are supposed to use memoization, but he (and I) still find exponential blowup on simple regexes like `(a|b)?(a|b)?...(a|b)(a|b)...`. 
 
 
 ---
