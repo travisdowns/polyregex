@@ -15,17 +15,17 @@ This is intended entirely as a proof of concept to make it easy to verify by imp
 sketch](https://twitter.com/trav_downs/status/1114977163093139456) - it is not a practical implementation at all. It is very slow and especially the "eager" moder uses many GB of memory to parse even relatively
 simple expressions with a few captured groups. If you want to implement a poly time (under the definition above) regex engine
 that handles backreferences, don't do it like this. Do it with backtracking with memoization or perhaps psuedo-NFA simulation with
-an expanded and dynamic state space that includes capture information in the state (these ideas are further elaborated [below](#more-practical-solutions).
+an expanded and dynamic state space that includes capture information in the state (these ideas are further elaborated [below](#more-practical-solutions)).
 
 ## Complexity Proof Sketch
 
 Here's proof sketch for this particular Java implementation operating in polynomial time (in the sense given above).
 
-The basic idea we step over each character and do a polynomial amount of work at each step, since the amount of work is bounded by the number of active states (which is polynomial in size). The details follow.
+The basic idea we step over each character and do a polynomial amount of work at each step, since the amount of work is bounded by the number of active states, itself bounded by the total number of all states (which is polynomial in size). The details follow.
 
-We consider one call to `new BackrefMatcher(pattern, true).matches(input)`. The length of the input is `n` and the length<sup>2</sup> of the pattern is `m`. The number of captured groups is `k` (in this code `k` is `BackrefMatcher.groupCount`). The number of backreference instances (occurences of a backreference in the pattern) is `b`. For example, the pattern `(.)\1\1\1` has one captured group and three backreference instances.
+We consider one call to `new BackrefMatcher(pattern, true).matches(input)`. The length of the input is `n` and the length<sup>2</sup> of the pattern is `m`. The number of captured groups is `k` (in the code `k` is `BackrefMatcher.groupCount`). The number of backreference instances (occurences of a backreference in the pattern) is `b`. For example, the pattern `(.)\1\1\1` has one captured group (`k=1`) and three backreference instances (`b=3`).
 
-Note that we use a `BackrefMatcher` with `isEager == true`, which generates the entire subNFA graph up front. This is terribly slow but makes it slightly easier to analyze. You can activate this mode at runtime by passing `-DBackrefMatcher.eager=true` to the JVM. The default mode is lazy which generates subFNA graphs only as needed, which is usually several orders of magnitude faster. 
+For this sketch we use a `BackrefMatcher` with `isEager == true`, which generates the every possible (and many impossible) subNFA graph up front. This is terribly slow but makes it slightly easier to analyze. You can activate this mode at runtime by passing `-DBackrefMatcher.eager=true` to the JVM. The default mode is lazy which generates subNFA graphs only as needed, which is usually several orders of magnitude faster. 
 
 First we examine the `BackrefMatcher` constructor: it doesn't deal with the input text at all, but just parses and compiles the pattern. This involves O(m) work, but we won't go into details because this is all basic NFA stuff and the O(m) term is going to disappear in the final results anyways.
 
@@ -45,7 +45,7 @@ Each capstate object has O(k) data (the `starts` and `ends` array both have leng
 
 The `cloneGraph` call creates a clone of the base NFA (with O(m) objects), except where the `State` objects are upgrade to `StateEx` which are created in O(1) time.
 
-The `State.expandBackrefs` call operates on this O(m)-sized graph, and expands each of the `b` backreference instances into distinct nodes, one per character in the captured group as represented in the capstate. Each are at most `n` characters, so the cost of this call is O(m + b*n). The total number of nodes in each SubFNA graph is also `O(m + b*n)` (this will be important later).
+The `State.expandBackrefs` call operates on this O(m)-sized graph, and expands each of the `b` backreference instances into distinct nodes, one per character in the captured group as represented in the capstate. Each are at most `n` characters, so the cost of this call is O(m + b\*n). The total number of nodes in each SubNFA graph is also `O(m + b*n)` (this will be important later).
 
 Summarizing, `SubNFA` constructor does `O(m + b\*n)` work (same for space) and there are `O(n^2k)` SubNFAs, so we have `O(m*n^2k + b*n^(2k+1))` work and space. We generally expect the second term to dominate as it is higher order in `n`. The total number of nodes (possible states) in the entire graph has the same order. We will call this `O(m*n^2k + b*n^(2k+1))` term `t` for brevity in the following analysis.  
 
