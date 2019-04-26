@@ -68,7 +68,7 @@ public class RegexLexer implements RegexTokens {
             } else if (Character.toString(c).matches("[a-zA-Z]")) {
                 ret.add(new LexToken(CHAR, c));
             } else {
-                throw new RuntimeException("Unexpected character while lexing: " + c);
+                throw new RuntimeException("Unexpected character while lexing: " + c + " (" + (int)c + ")");
             }           
         }
         ret.add(new LexToken(ENDINPUT, null));

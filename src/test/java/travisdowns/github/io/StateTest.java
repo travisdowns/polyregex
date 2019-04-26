@@ -56,7 +56,7 @@ public class StateTest {
         State start = stateFor(pattern);
         State.expandBackrefs(start, text,
                 new CaptureState(new int[]{i}, new int[]{j}, text.length()), State::new);
-        assertTrue(new BackrefMatcher(start, false).matches(text));
+        assertTrue(new BackrefMatcher(pattern, start, false).matches(text));
     }
     
 

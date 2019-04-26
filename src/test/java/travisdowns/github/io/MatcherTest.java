@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,11 +20,17 @@ public class MatcherTest {
     
     @Parameters(name = "{0}")
     public static List<Object[]> getMatcherFactories() {
-        return ImmutableList.of(
+        List<Object[]> all = ImmutableList.of(
                 params("Original",      s -> new OriginalMatcher(s)),
                 params("Backref-lazy",  s -> new BackrefMatcher(s, false)), // lazy  subNFA creation
                 params("Backref-eager", s -> new BackrefMatcher(s, true))   // eager subNFA creation
                 );
+        String testonly = System.getProperty("MatcherTest.matcher");
+        if (testonly != null) {
+            return all.stream().filter(p -> p[0].equals(testonly)).collect(Collectors.toList());
+        } else {
+            return all;
+        }
     }
     
     private static Object[] params(String name, Function<String, Matcher> f) {
@@ -110,9 +117,13 @@ public class MatcherTest {
 		assertTrue (matches("(ab)*", "ab"));
 		assertTrue (matches("(ab)*", "ababab"));
 		assertTrue (matches("(ab)*(cdef)*",    "abababcdefcdef"));
-		if (!name.equals("Backref-eager")) { // too slow with BR eager matcher
-		    assertTrue (matches("((ab)*(cdef)*)*", "abababcdefcdefababcdef"));		    
-		}
+	}
+	
+	@Test
+	public void testParensStar2() {
+	    if (!name.equals("Backref-eager")) { // too slow with BR eager matcher
+	        assertTrue (matches("((ab)*(cdef)*)*", "abababcdefcdefababcdef"));          
+	    }
 	}
 	
 	@Test
