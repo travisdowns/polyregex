@@ -1,4 +1,4 @@
-package io.github.travisdowns.polyregex;
+package io.github.travisdowns.polyregex.obsolete;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -6,7 +6,7 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.HashMap;
 import java.util.Map;
 
-class Token {
+public class Token {
 
     enum Type {
         STAR("*"), DOT("."), PLUS("+"), ALT("|"), OPENP("("), CLOSEP(")"), QUESTION("?"),

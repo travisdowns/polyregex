@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
 
-import io.github.travisdowns.polyregex.Parser;
-import io.github.travisdowns.polyregex.Token;
+import io.github.travisdowns.polyregex.obsolete.Parser;
+import io.github.travisdowns.polyregex.obsolete.Token;
 
 public class OriginalParserTest {
     

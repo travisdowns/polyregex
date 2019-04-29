@@ -1,5 +1,7 @@
 package io.github.travisdowns.polyregex;
 
+import io.github.travisdowns.polyregex.obsolete.OriginalMatcher;
+
 public class Main {
     public static void main(String[] args) {
 //        System.err.println("" + (args.length - 1) + " strings passed");

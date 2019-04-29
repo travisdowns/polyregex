@@ -17,7 +17,7 @@ import com.google.common.collect.ImmutableList;
 
 import io.github.travisdowns.polyregex.BackrefMatcher;
 import io.github.travisdowns.polyregex.Matcher;
-import io.github.travisdowns.polyregex.OriginalMatcher;
+import io.github.travisdowns.polyregex.obsolete.OriginalMatcher;
 
 @RunWith(Parameterized.class)
 public class MatcherTest {

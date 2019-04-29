@@ -14,7 +14,7 @@ import java.util.function.Function;
 public class State {
     /* indirection to allow state pointers to be recorded and updated in fragments */
     public static class StateRef {
-        State s;
+        public State s;
         public StateRef(State s) {
             this.s = s;
         }
@@ -22,15 +22,14 @@ public class State {
 
     public static State MATCHSTATE = new State(Type.MATCH, 0);
 
-    enum Type {
+    public enum Type {
         CHAR, ANY, SPLIT, MATCH, LPAREN, RPAREN, BACKREF, FORWARD, INVALID, MATCHNOTHING;
     }
 
     int id;
-    int c;
-    final Type type;
-    StateRef out;
-    StateRef out1;
+    public int c;
+    public final Type type;
+    public StateRef out, out1;
 
     private State(State.Type type, int id) {
         this.type = type;
@@ -305,6 +304,4 @@ public class State {
             }
         }
     }
-    
-
 }

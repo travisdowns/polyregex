@@ -1,10 +1,10 @@
-package io.github.travisdowns.polyregex;
+package io.github.travisdowns.polyregex.obsolete;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.github.travisdowns.polyregex.Token.Type.ALT;
-import static io.github.travisdowns.polyregex.Token.Type.BACKREF;
-import static io.github.travisdowns.polyregex.Token.Type.CHAR;
-import static io.github.travisdowns.polyregex.Token.Type.CONCAT;
+import static io.github.travisdowns.polyregex.obsolete.Token.Type.ALT;
+import static io.github.travisdowns.polyregex.obsolete.Token.Type.BACKREF;
+import static io.github.travisdowns.polyregex.obsolete.Token.Type.CHAR;
+import static io.github.travisdowns.polyregex.obsolete.Token.Type.CONCAT;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

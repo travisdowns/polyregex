@@ -1,7 +1,7 @@
 /**
  * 
  */
-package io.github.travisdowns.polyregex;
+package io.github.travisdowns.polyregex.obsolete;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;

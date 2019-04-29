@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import io.github.travisdowns.polyregex.Hypercube;
+import io.github.travisdowns.polyregex.obsolete.Hypercube;
 
 public class HypercubeTest {
     

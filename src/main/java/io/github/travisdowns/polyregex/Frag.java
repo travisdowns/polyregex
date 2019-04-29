@@ -10,8 +10,8 @@ import com.google.common.base.MoreObjects;
 import io.github.travisdowns.polyregex.State.StateRef;
 
 public class Frag {
-    State start;
-    List<StateRef> out;
+    public State start;
+    public List<StateRef> out;
 
     public Frag(State start, List<StateRef> out) {
         this.start = start;

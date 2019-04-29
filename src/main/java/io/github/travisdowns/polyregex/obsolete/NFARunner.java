@@ -1,4 +1,4 @@
-package io.github.travisdowns.polyregex;
+package io.github.travisdowns.polyregex.obsolete;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
+
+import io.github.travisdowns.polyregex.State;
+import io.github.travisdowns.polyregex.Verbose;
 
 /**
  * Based on match and associated functions from https://swtch.com/~rsc/regexp/nfa.c.txt originally written by Russ Cox,

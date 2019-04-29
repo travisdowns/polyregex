@@ -1,4 +1,4 @@
-package io.github.travisdowns.polyregex;
+package io.github.travisdowns.polyregex.obsolete;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -7,6 +7,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 
+import io.github.travisdowns.polyregex.Frag;
+import io.github.travisdowns.polyregex.State;
 import io.github.travisdowns.polyregex.State.StateRef;
 
 /**

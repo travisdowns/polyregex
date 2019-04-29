@@ -1,6 +1,9 @@
-package io.github.travisdowns.polyregex;
+package io.github.travisdowns.polyregex.obsolete;
 
 import java.util.List;
+
+import io.github.travisdowns.polyregex.Matcher;
+import io.github.travisdowns.polyregex.State;
 
 public class OriginalMatcher implements Matcher {
     
