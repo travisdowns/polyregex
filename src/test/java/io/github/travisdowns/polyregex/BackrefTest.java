@@ -1,4 +1,4 @@
-package travisdowns.github.io;
+package io.github.travisdowns.polyregex;
 
 import static org.junit.Assert.*;
 
@@ -15,6 +15,9 @@ import org.junit.runners.Parameterized.Parameters;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
+
+import io.github.travisdowns.polyregex.BackrefMatcher;
+import io.github.travisdowns.polyregex.Matcher;
 
 /** tests with backrefs */
 @RunWith(Parameterized.class)

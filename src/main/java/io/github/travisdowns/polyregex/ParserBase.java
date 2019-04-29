@@ -1,4 +1,4 @@
-package travisdowns.github.io;
+package io.github.travisdowns.polyregex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -6,7 +6,7 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.Collections;
 import java.util.List;
 
-import travisdowns.github.io.State.StateRef;
+import io.github.travisdowns.polyregex.State.StateRef;
 
 public class ParserBase {
     

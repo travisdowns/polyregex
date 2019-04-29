@@ -1,4 +1,4 @@
-package travisdowns.github.io;
+package io.github.travisdowns.polyregex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.google.common.base.MoreObjects;
 
-import travisdowns.github.io.State.StateRef;
+import io.github.travisdowns.polyregex.State.StateRef;
 
 public class Frag {
     State start;

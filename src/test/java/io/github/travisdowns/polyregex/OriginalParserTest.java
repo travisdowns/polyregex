@@ -1,10 +1,13 @@
-package travisdowns.github.io;
+package io.github.travisdowns.polyregex;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import io.github.travisdowns.polyregex.Parser;
+import io.github.travisdowns.polyregex.Token;
 
 public class OriginalParserTest {
     

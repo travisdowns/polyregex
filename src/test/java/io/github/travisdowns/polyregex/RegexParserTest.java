@@ -1,8 +1,10 @@
-package travisdowns.github.io;
+package io.github.travisdowns.polyregex;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import io.github.travisdowns.polyregex.RegexParser;
 
 
 public class RegexParserTest {

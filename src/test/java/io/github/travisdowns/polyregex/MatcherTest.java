@@ -1,4 +1,4 @@
-package travisdowns.github.io;
+package io.github.travisdowns.polyregex;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -14,6 +14,10 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.google.common.collect.ImmutableList;
+
+import io.github.travisdowns.polyregex.BackrefMatcher;
+import io.github.travisdowns.polyregex.Matcher;
+import io.github.travisdowns.polyregex.OriginalMatcher;
 
 @RunWith(Parameterized.class)
 public class MatcherTest {

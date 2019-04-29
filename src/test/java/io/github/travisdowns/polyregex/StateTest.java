@@ -1,4 +1,4 @@
-package travisdowns.github.io;
+package io.github.travisdowns.polyregex;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.junit.Assert.*;
@@ -9,6 +9,11 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.Test;
 
 import com.google.common.base.Joiner;
+
+import io.github.travisdowns.polyregex.BackrefMatcher;
+import io.github.travisdowns.polyregex.CaptureState;
+import io.github.travisdowns.polyregex.RegexParser;
+import io.github.travisdowns.polyregex.State;
 
 public class StateTest {
 

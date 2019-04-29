@@ -1,8 +1,8 @@
-package travisdowns.github.io;
+package io.github.travisdowns.polyregex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static travisdowns.github.io.Verbose.verbose;
+import static io.github.travisdowns.polyregex.Verbose.verbose;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 import com.google.common.base.Joiner;
 
-import travisdowns.github.io.State.Type;
+import io.github.travisdowns.polyregex.State.Type;
 
 
 public class BackrefMatcher implements Matcher {

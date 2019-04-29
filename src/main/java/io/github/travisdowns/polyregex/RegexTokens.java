@@ -1,6 +1,6 @@
 // Output created by jacc on Sun Apr 21 19:04:56 COT 2019
 
-package travisdowns.github.io;
+package io.github.travisdowns.polyregex;
 
 interface RegexTokens {
     int ENDINPUT = 0;
