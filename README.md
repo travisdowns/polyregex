@@ -1,7 +1,11 @@
+## What
+
 This is really slow regex matcher, and an attempt to answer [this question](https://branchfree.org/2019/04/04/question-is-matching-fixed-regexes-with-back-references-in-p/), which supports backrefences in [deterministic polynomial time](https://en.wikipedia.org/wiki/P_(complexity)) _in the 
 size of the input text_ for a fixed number of backreferences in the pattern. That is, varying only the input size, not the pattern<sup>1</sup> the 
 running time will be in P. In fact, since (like many other engines) only 9 backreferences (`\1` through `\9`) are supported, we
 can say that this engine is _always_ runs in P due to the cap on the number of backreferences (at the moment not technically true depending on how diligent you are at using non-capturing groups due to [issue #1](https://github.com/travisdowns/polyregex/issues/1)).
+
+As far I can tell so far, it is the only polynomial time regex engine to support backreferences. Other engines are either DNA or NFA based, and do no support backreferences, or use a backtracking approach which supports backreferences and may other features, but are subject to exponential running time for certain patterns (even when the patterns don't contain backreferences).   
 
 The basic idea is to duplicate the underlying backreference-unaware NFA (hereafter the "base NFA") for all combinations of start/stop points in the 
 input for every captured group. If there are `k` captured groups, that's `O(n^2k)` copies of the base NFA which is polynomial in `n` for fixed `k`. Since the
@@ -16,6 +20,47 @@ sketch](https://twitter.com/trav_downs/status/1114977163093139456) - it is not a
 simple expressions with a few captured groups. If you want to implement a poly time (under the definition above) regex engine
 that handles backreferences, don't do it like this. Do it with backtracking with memoization or perhaps psuedo-NFA simulation with
 an expanded and dynamic state space that includes capture information in the state (these ideas are further elaborated [below](#more-practical-solutions)).
+
+## If You Want To Use This
+
+If you _do_ actually want to try this out, here's how.
+
+### Build
+
+It's a normal Maven project. You can build it with `mvn package` or `mvn install` (the latter to install it to the local maven repository).
+
+### Running
+
+The output jar `target/polyregex-1.0-SNAPSHOT-jar-with-dependencies.jar` is an uber-jar that you can run directly. By default, it provides a feature-poor implementation of something like `grep`, looking for the pattern provided on the command line.
+
+For example, matching input file
+
+```
+ cats like cats 
+ dogs like cats 
+ dogs like dogs
+```
+
+against the pattern `(dogs|cats).*\1` can be done as follows so:
+
+```
+$ echo -e " cats like cats \n dogs like cats \n dogs like dogs" | java -jar target/polyregex-1.0-SNAPSHOT-jar-with-dependencies.jar '(dogs|cats).*\1'
+ cats like cats 
+ dogs like dogs
+```
+
+### Russ Cox Timing
+
+You can also use the polyregex matcher via the `timing/xnfa-java` script, as part of Russ Cox's tests of the exponential behavior of various regex engines. 
+
+For example to time `egrep`, Russ Cox's `xnfa` matcher<sup>5</sup>, perl's regex implementation and polyregex you can use:
+
+```
+cd timing
+PATH=".:$PATH" ./xtime xegrep xnfa xperl xnfa-java
+```
+
+More details on Russ Cox's [regex page](https://swtch.com/~rsc/regexp/). 
 
 ## Complexity Proof Sketch
 
@@ -88,3 +133,5 @@ Russ Cox's [regex resources](https://swtch.com/~rsc/regexp/) were invaluable in 
 <sup>3</sup> It is important to consider them as a whole, since if you consider one `addstate` call at a time, you'll also get `O(t)` work, for a total of `O(n*t)` work for the `step()` call. The calls are not independent though because the `visited` set bound the total work across all `addstate` calls within any `step()`.
 
 <sup>4</sup> In particular, it is enough for the size of the regex to be no more than quadratic in the size of the input, i.e, that m is `O(n^2)`.
+
+<sup>5</sup> Build it with `gcc -O2 -o xnfa nfa.c` in the `timing` directory.
