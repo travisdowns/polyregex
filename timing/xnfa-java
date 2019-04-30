@@ -2,4 +2,4 @@
 
 re=$1
 shift
-java -jar ../target/polyregex-1.0-SNAPSHOT-jar-with-dependencies.jar "$re" "$@"
+java -jar ../target/polyregex-1.0-SNAPSHOT-jar-with-dependencies.jar --xtime "$re" "$@"
