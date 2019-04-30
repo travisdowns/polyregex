@@ -45,7 +45,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>travisdowns.github.io.Main</mainClass>
+              <mainClass>io.github.travisdowns.polyregex.Main</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
