@@ -1,4 +1,4 @@
-A really slow regex matcher, which supports backrefences in [deterministic polynomial time](https://en.wikipedia.org/wiki/P_(complexity)) _in the 
+This is really slow regex matcher, and an attempt to answer [this question](https://branchfree.org/2019/04/04/question-is-matching-fixed-regexes-with-back-references-in-p/), which supports backrefences in [deterministic polynomial time](https://en.wikipedia.org/wiki/P_(complexity)) _in the 
 size of the input text_ for a fixed number of backreferences in the pattern. That is, varying only the input size, not the pattern<sup>1</sup> the 
 running time will be in P. In fact, since (like many other engines) only 9 backreferences (`\1` through `\9`) are supported, we
 can say that this engine is _always_ runs in P due to the cap on the number of backreferences (at the moment not technically true depending on how diligent you are at using non-capturing groups due to [issue #1](https://github.com/travisdowns/polyregex/issues/1)).
@@ -65,7 +65,9 @@ This is the closest to the existing solution. The solution in this repository st
 
 Another approach, however, would be not to duplicate any NFA nodes, but to augment each state object with the necessarily extra information to carry along capture related information. The transitions would use the base NFA, but there could be multiple states pointing to the same NFA node, which differ in their capture information and each one would be transitioned separately. Matching backreference instances could be accomodated not by "expanding" the NFA nodes as in the current solution, but by tracking state that indicates, when the state is matching a backreference, how many of the backreference characters have been matched so far. Each `step()` would try to transition the state by matching the next character, or finally leaving the backreference match node if all characters have been matched.
 
-I think this would achieve the same or better bound as the current solution, more efficiently.
+This approach has other advantages such as the ability to track other state that might be useful, e.g., a "count" state for matching counted repetition like `a{1,5}` - which is hard to implement efficiently in an NFA (the naive solution requires to duplicate the states for the repeated pattern 5 times in this example). 
+
+I think this would achieve the same or better bound as the current solution, more efficiently. 
 
 ### Backtracking with memoizing
 

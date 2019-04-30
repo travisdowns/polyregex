@@ -302,6 +302,8 @@ public class BackrefMatcher implements Matcher {
         this.groupCount = groupCount;
         debug("Got %s unique captured groups", groupCount);
         State.assignIds(start);
+        debug2("Base NFA States:\n-------------------------\n" + State.printStates(start)
+                + "-------------------------\n");
     }
 
 

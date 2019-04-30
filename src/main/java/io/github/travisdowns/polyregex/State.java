@@ -6,9 +6,11 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public class State {
@@ -152,22 +154,24 @@ public class State {
     }
 
     private String toString(boolean recurse) {
+        String prefix;
         switch (type) {
         case CHAR:
-            return "CHAR[" + (char) c + "]";
+            prefix = "CHAR[" + (char) c + "]";
+            break;
         case SPLIT:
             if (recurse) {
-                return "SPLIT[out=" + out.s.toString(false) + ",out1=" + out1.s.toString(false) + "]";
+                prefix = "SPLIT[out=" + out.s.toString(false) + ",out1=" + out1.s.toString(false) + "]";
             } else {
-                return "SPLIT[...]";
+                prefix = "SPLIT[...]";
             }
-        case LPAREN:
-            return "(";
-        case RPAREN:
-            return ")";
+            break;
         default:
-            return String.format("%-7s", type);
+            prefix = String.format("%-7s", type);
+            break;
         }
+        
+        return String.format("%-7s id=%2d", prefix, id);
     }
 
     /** return a list of all states reachable from the current state */
@@ -258,6 +262,42 @@ public class State {
         List<State> newStates = allStates(start);
         checkState(newStates.size() >= allStates.size());
         checkState(!newStates.stream().anyMatch(s -> s.type == Type.BACKREF)); // no more backrefs!
+    }
+    
+    public static String printStates(State start) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format(" ID  TYPE   OUT-ARROWS\n"));
+        printStatesHelper(start, sb, new HashSet<>());
+        return sb.toString();
+    }
+    
+    private static String nodeLocation(String arrowName, State next, Set<State> visited) {
+        if (visited.contains(next)) {
+            // node already printed
+            return String.format(" %s = node %3d (above)", arrowName, next.id);
+        } else {
+            return String.format(" %s = node %3d (immediately below)", arrowName, next.id);
+        }
+    }
+    
+    private static void printStatesHelper(State s, StringBuilder sb, Set<State> visited) {
+        if (!visited.contains(s)) {
+            visited.add(s);
+            sb.append(String.format("%4d %-7s", s.id, s.type));
+            if (s.out != null) {
+                if (s.out1 == null) {
+                    sb.append(nodeLocation("out", s.out.s, visited) + "\n");
+                    printStatesHelper(s.out.s, sb, visited);
+                } else {
+                    sb.append(nodeLocation("out", s.out.s, visited));
+                    sb.append(String.format(" out1 = node %3d\n", s.out1.s.id));
+                    printStatesHelper(s.out .s, sb, visited);
+                    printStatesHelper(s.out1.s, sb, visited);
+                }
+            } else {
+                sb.append('\n');
+            }
+        }
     }
     
     private static List<State> makeStringMatcher(int id, String text, int start, int end,

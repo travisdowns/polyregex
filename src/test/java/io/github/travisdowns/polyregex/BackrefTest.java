@@ -147,13 +147,23 @@ public class BackrefTest {
      */
     @Test
     public void testGeoff2() {
-        // original probably was: ((\wx)\2)*z
-        // but we change \w to . since we don't support char classes
         String pattern = "(?:(?:.|..|...)(.)(?:.|..|...)\\1)+";
-     
-//        assertTrue (matches(pattern, "fooxxxxxxxxxxbar"));
+        assertTrue (matches(pattern, "0a123a456b7b"));
+        assertFalse(matches(pattern, "0a1238a456b7b"));
         assertTrue (matches(pattern, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"));
     }
+    
+    /**
+     * A more extreme version of Geoff2 which doesn't bound the prefix and suffix size
+     * or the capture group size.
+     */
+    @Test
+    public void testGeoff3() {
+        String pattern = "(?:.*(.+).*\\1)+";
+        assertTrue (matches(pattern, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"));
+    }
+    
+    
 	
 	@Test
 	public void testIsPrime() {
