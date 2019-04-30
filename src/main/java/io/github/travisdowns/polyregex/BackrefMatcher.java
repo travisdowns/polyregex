@@ -31,7 +31,7 @@ public class BackrefMatcher implements Matcher {
     private final State start;
     /** number of captured groups referenced by a backref (i.e., "unique backrefs") */
     private final int groupCount;
-    /** if true, all the possible subFNA groups are calculated before matching even starts, really slow */ 
+    /** if true, all the possible subNFA groups are calculated before matching even starts, really slow */ 
     private final boolean isEager;
 
     /** instance of this class created for each match request, depends on the length of the input string */
@@ -45,7 +45,7 @@ public class BackrefMatcher implements Matcher {
             SubNFA ret = capToSub.get(capstate);
             if (ret == null) {
                 checkState(!isEager, "sub for capstate not found in eager mode: %s", capstate);
-                debug2("Creating SubFNA for captstate %s", capstate);
+                debug2("Creating SubNFA for captstate %s", capstate);
                 ret = new SubNFA(start, capstate);
                 capToSub.put(capstate, ret);
             }
@@ -54,7 +54,7 @@ public class BackrefMatcher implements Matcher {
 
         /**
          * The original NFA is duplicated once for each possible combination of start/end
-         * positions for each match. Each duplicated FNA is held by a SubNFA.
+         * positions for each match. Each duplicated NFA is held by a SubNFA.
          */
         private class SubNFA {
 
