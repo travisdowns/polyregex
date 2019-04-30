@@ -140,6 +140,21 @@ public class BackrefTest {
         assertTrue (matches(pattern, "axaxaxaxaxaxaxaxbxbxbxbxbxbxz"));
 	}
 	
+	/**
+     * Test of pattern described by Geoff in https://github.com/travisdowns/polyregex/issues/2
+     * but with {1,5} replaced by (.|..|...) since we don't support counted matches. 
+     * .(..+)+
+     */
+    @Test
+    public void testGeoff2() {
+        // original probably was: ((\wx)\2)*z
+        // but we change \w to . since we don't support char classes
+        String pattern = "(?:(?:.|..|...)(.)(?:.|..|...)\\1)+";
+     
+//        assertTrue (matches(pattern, "fooxxxxxxxxxxbar"));
+        assertTrue (matches(pattern, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"));
+    }
+	
 	@Test
 	public void testIsPrime() {
 	    assertTrue (isPrime(2));

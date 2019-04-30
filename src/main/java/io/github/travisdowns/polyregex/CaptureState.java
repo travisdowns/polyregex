@@ -39,8 +39,10 @@ public final class CaptureState {
     public CaptureState withStart(int capture, int startIdx) {
         checkState(startIdx <= textlen);
         int[] newstarts = this.starts.clone();
+        int[] newends   = this.ends  .clone();
         newstarts[capture - 1] = startIdx;
-        return new CaptureState(newstarts, this.ends, textlen);
+        newends  [capture - 1] = -1; // when we restart a capture we set the end to -1 ("unset")
+        return new CaptureState(newstarts, newends, textlen);
     }
     
     /**
@@ -48,6 +50,7 @@ public final class CaptureState {
      */
     public CaptureState withEnd(int capture, int endIdx) {
         checkState(endIdx <= textlen);
+        checkState(starts[capture - 1] != -1, "end without start");
         int[] newends = this.ends.clone();
         newends[capture - 1] = endIdx;
         return new CaptureState(this.starts, newends, textlen);
@@ -72,5 +75,16 @@ public final class CaptureState {
     @Override
     public String toString() {
         return new ReflectionToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE).toString();
+    }
+    
+    /**
+     * @return terse representation than {@link #toString()}, with a (start, end) pair for each captured group, like (1,5)
+     */
+    public String str() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < starts.length; i++) {
+            sb.append(String.format("(%d,%d)%s", starts[i], ends[i], i == 0 ? "" : ", "));
+        }
+        return sb.toString();
     }
 }

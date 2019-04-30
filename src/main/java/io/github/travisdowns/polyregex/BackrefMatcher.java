@@ -2,7 +2,6 @@ package io.github.travisdowns.polyregex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.github.travisdowns.polyregex.Verbose.verbose;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,8 +16,8 @@ import io.github.travisdowns.polyregex.State.Type;
 
 public class BackrefMatcher implements Matcher {
     
-    private static final boolean IS_EAGER  = Boolean.getBoolean("BackrefMatcher.eager");
-    private static final boolean DEBUG_OUT = Boolean.getBoolean("BackrefMatcher.debug");
+    private static final boolean IS_EAGER    = Boolean.getBoolean("BackrefMatcher.eager");
+    private static final int DEBUG_LEVEL     = Integer.getInteger("BackrefMatcher.debug", 0);
     
     /**
      * Pattern underlying this matcher, only used for display purposes (the compiled pattern is 
@@ -46,7 +45,7 @@ public class BackrefMatcher implements Matcher {
             SubNFA ret = capToSub.get(capstate);
             if (ret == null) {
                 checkState(!isEager, "sub for capstate not found in eager mode: %s", capstate);
-                verbose("Creating SubFNA for captstate %s", capstate);
+                debug2("Creating SubFNA for captstate %s", capstate);
                 ret = new SubNFA(start, capstate);
                 capToSub.put(capstate, ret);
             }
@@ -75,7 +74,7 @@ public class BackrefMatcher implements Matcher {
                 
                 @Override
                 public String toString() {
-                    return super.toString() + " (capstate : " + capstate + ")";
+                    return super.toString() + " (captures : " + capstate.str() + ")";
                 }
             }
 
@@ -150,31 +149,16 @@ public class BackrefMatcher implements Matcher {
                         addstate(s.out1.s, textIdx, depth + 1);
                         break;
                     case LPAREN:
-                        checkState(s.out1 == null);
-                        if (s.c == 0) { // parens 0 is special, don't jump to a sub in that case
-                            addstate(s.out.s, textIdx, depth + 1);
-                        } else {
-                            // jump to a new subNFA reflecting starting a new capture at the current text position + 1
-                            CaptureState newcap = s.getOuter().capstate.withStart(s.c, textIdx + 1);
-                            SubNFA sub = getSub(newcap);
-                            checkState(sub != null, "sub was null for capstate %s", newcap);
-                            // normally we'd addstate(s.out.s), so now look up the corresponding state
-                            // in sub based on id
-                            int stateId = s.out.s.id;
-                            checkState(stateId >= 0);
-                            SubNFA.StateEx newstate = sub.idToState.get(stateId);
-                            checkState(newstate != null);
-                            addstate(newstate, textIdx, depth + 1);
-                        }
-                        break;
                     case RPAREN:
                         checkState(s.out1 == null);
                         if (s.c == 0) { // parens 0 is special, don't jump to a sub in that case
                             addstate(s.out.s, textIdx, depth + 1);
                         } else {
                             // jump to a new subNFA reflecting starting a new capture at the current text position + 1
-                            CaptureState newcap = s.getOuter().capstate.withEnd(s.c, textIdx + 1);
+                            CaptureState oldcap = s.getOuter().capstate;
+                            CaptureState newcap = s.type == Type.LPAREN ? oldcap.withStart(s.c, textIdx + 1) : oldcap.withEnd(s.c, textIdx + 1);
                             SubNFA sub = getSub(newcap);
+                            checkState(sub != null, "sub was null for capstate %s", newcap);
                             // normally we'd addstate(s.out.s), so now look up the corresponding state
                             // in sub based on id
                             int stateId = s.out.s.id;
@@ -248,23 +232,25 @@ public class BackrefMatcher implements Matcher {
             int[] indexes = new int[groupCount];
             Arrays.fill(indexes, -1);
             l.addstate(getSub(new CaptureState(indexes, indexes,text.length())).start, -1, 1);
-            verbose("Created starting state list with %s states (%s visited)", l.size(), l.visitedSize());
-            for (SubNFA.StateEx s : l.states) {
-                debug("  %s", s);
-            }
+            debug("Created starting state list with %s states (%s visited)", l.size(), l.visitedSize());
+            dumpStates(l);
             return l;
         }
+
 
         /*
          * Step the NFA from the states in clist past the character c, returns the new NFA state list.
          */
-        private StateList step(StateList clist, int c, int textIdx) {
+        private StateList step(StateList clist, char c, int textIdx) {
             StateList nlist = new StateList();
             for (State s : clist.states) {
-                if (s.type == State.Type.ANY || (s.type == State.Type.CHAR && s.c == c)) {
+                if (s.matches(c)) {
                     nlist.addstate(s.out.s, textIdx, 1);
                 }
             }
+            debug("Processed character %c at position %d: %s current states (%s visited)",
+                    c, textIdx, nlist.size(), nlist.visitedSize());
+            dumpStates(nlist);
             return nlist;
         }
 
@@ -284,6 +270,12 @@ public class BackrefMatcher implements Matcher {
                 throw e;
             }
         }
+        
+        private void dumpStates(StateList l) {
+            for (SubNFA.StateEx s : l.states) {
+                debug2("  %s", s);
+            }
+        }
     }
 
     public BackrefMatcher(String pattern) {
@@ -297,18 +289,18 @@ public class BackrefMatcher implements Matcher {
     }
     
     BackrefMatcher(String pattern, State start, boolean isEager) {
-        verbose("Creating %s BackrefMatcher for pattern %s", isEager ? "eager" : "lazy", pattern);
+        debug("Creating %s BackrefMatcher for pattern %s", isEager ? "eager" : "lazy", pattern);
         this.pattern = pattern;
         this.start = start;
         this.isEager = isEager;
         List<State> allStates = State.allStates(start);
-        verbose("Got %s total unexpanded states", allStates.size());
+        debug("Got %s total unexpanded states", allStates.size());
         int groupCount = (int)allStates.stream().filter(s -> s.type == Type.LPAREN).count();
         if (allStates.get(0).type == Type.LPAREN) {
             groupCount--; // don't count outer \0 group
         }
         this.groupCount = groupCount;
-        verbose("Got %s unique captured groups", groupCount);
+        debug("Got %s unique captured groups", groupCount);
         State.assignIds(start);
     }
 
@@ -316,7 +308,7 @@ public class BackrefMatcher implements Matcher {
     @Override
     /* Run NFA to determine whether it matches s. */
     public boolean matches(String text) {
-        verbose("Matching text %s against pattern %s", text, pattern);
+        debug("Matching text %s against pattern %s", text, pattern);
         return new BackrefRunner(text).matches();
     }
 
@@ -325,9 +317,18 @@ public class BackrefMatcher implements Matcher {
         return new BackrefMatcher(pattern).matches(text); 
     }
     
-    public static void debug(String fmt, Object... args) {
-        if (DEBUG_OUT) {
-            System.out.println(String.format(fmt, args));
+    
+    private static void debug(String fmt, Object... args) {
+        debugN(1, fmt, args);
+    }
+    
+    private static void debug2(String fmt, Object... args) {
+        debugN(2, fmt, args);
+    }
+    
+    private static void debugN(int level, String fmt, Object... args) {
+        if (level <= DEBUG_LEVEL) {
+            System.out.println("BRDEBUG: " + String.format(fmt, args));
         }
     }
 }

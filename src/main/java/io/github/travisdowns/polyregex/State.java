@@ -62,6 +62,27 @@ public class State {
         return type == Type.LPAREN || type == Type.RPAREN;
     }
     
+    /**
+     * If the state is a type which can match characters, (i.e., is a state with one outgoing labeled arrows,
+     * return true if the given character matches.
+     * <p>
+     * Throws an expcetion if not a matching type state.
+     * @param c
+     * @return
+     */
+    public boolean matches(char testchar) {
+        switch (type) {
+        case CHAR:
+            return c == testchar;
+        case ANY:
+            return true;
+        case MATCH:
+            return false;
+        default:
+            throw new IllegalStateException("unexpected state in State.matches: " + type);
+        }
+    }
+    
     /** how many outgoing refs this state has (throws if any are dangling) */
     public int outRefs() {
         checkState(isComplete());
@@ -145,7 +166,7 @@ public class State {
         case RPAREN:
             return ")";
         default:
-            return type.toString();
+            return String.format("%-7s", type);
         }
     }
 
