@@ -65,10 +65,10 @@ public class RegexLexer implements RegexTokens {
                 ret.add(new LexToken(BACKREF, digit));
             } else if ("()*+.:?|".indexOf(c) != -1) {
                 ret.add(new LexToken(c, null));
-            } else if (Character.toString(c).matches("[a-zA-Z]")) {
+            } else if (!Character.isSurrogate(c)) {
                 ret.add(new LexToken(CHAR, c));
             } else {
-                throw new RuntimeException("Unexpected character while lexing: " + c + " (" + (int)c + ")");
+                throw new RuntimeException("UTF-16 surrogates not supported");
             }           
         }
         ret.add(new LexToken(ENDINPUT, null));
