@@ -120,6 +120,14 @@ In principle, I think a backtracking implementation, which is generally simpler 
 
 Russ Cox metnions that Perl 5 regular expressions are supposed to use memoization, but he (and I) still find exponential blowup on simple regexes like `(a|b)?(a|b)?...(a|b)(a|b)...`. 
 
+## Related Papers
+
+I came across some related papers.
+
+[Extending Finite Automata to Efficiently Match  Perl-Compatible Regular Expressions](https://www.arl.wustl.edu/~pcrowley/a25-becchi.pdf) describes practical approaches to writing NFA and DFA-like matchers that handle backreferences. The basic approach is additional information in each state which tracks the current matches, much like the "NFA with additional state" description above. I don't think they provide a time complexity value, but they mention a O(m*n^2) space per backreference, a similar bound to that discussed above.
+
+Further towards the theory side of the spectrum we have [Regular Expressions with Backreferences:Polynomial-Time Matching Techniques](https://arxiv.org/pdf/1903.05896.pdf). The main result is that regular expressions with backreferences can be classified in terms of their "active variable degree", which roughly speaking is the number of required slots for storing information about backreferences, which might be less than the total number of backreferences for various reasons. Although it isn't the focus on the paper, they show an O(m*n^O(k)) bound in Lemma 2, where k is bonded above by the number of captured groups, hence again confirming polynomial time for bounded-capture regex.  
+
 ## Thanks
 
 Russ Cox's [regex resources](https://swtch.com/~rsc/regexp/) were invaluable in understanding how to handle NFA similuation and other concerns.
