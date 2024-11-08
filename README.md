@@ -5,7 +5,7 @@ size of the input text_ for a fixed number of backreferences in the pattern. Tha
 running time will be in P. In fact, since (like many other engines) only 9 backreferences (`\1` through `\9`) are supported, we
 can say that this engine is _always_ runs in P due to the cap on the number of backreferences (at the moment not technically true depending on how diligent you are at using non-capturing groups due to [issue #1](https://github.com/travisdowns/polyregex/issues/1)).
 
-As far I can tell so far, it is the only polynomial time regex engine to support backreferences. Other engines are either DNA or NFA based, and do no support backreferences, or use a backtracking approach which supports backreferences and may other features, but are subject to exponential running time for certain patterns (even when the patterns don't contain backreferences).   
+As far I can tell so far, it is the only polynomial time regex engine to support backreferences. Other engines are either DFA or NFA based, and do no support backreferences, or use a backtracking approach which supports backreferences and may other features, but are subject to exponential running time for certain patterns (even when the patterns don't contain backreferences).   
 
 The basic idea is to duplicate the underlying backreference-unaware NFA (hereafter the "base NFA") for all combinations of start/stop points in the 
 input for every captured group. If there are `k` captured groups, that's `O(n^2k)` copies of the base NFA which is polynomial in `n` for fixed `k`. Since the
@@ -35,7 +35,7 @@ The output jar `target/polyregex-1.0-SNAPSHOT-jar-with-dependencies.jar` is an u
 
 For example, matching input file
 
-```
+```txt
  cats like cats 
  dogs like cats 
  dogs like dogs
@@ -43,7 +43,7 @@ For example, matching input file
 
 against the pattern `(dogs|cats).*\1` can be done as follows so:
 
-```
+```shell
 $ echo -e " cats like cats \n dogs like cats \n dogs like dogs" | java -jar target/polyregex-1.0-SNAPSHOT-jar-with-dependencies.jar '(dogs|cats).*\1'
  cats like cats 
  dogs like dogs
@@ -55,7 +55,7 @@ You can also use the polyregex matcher via the `timing/xnfa-java` script, as par
 
 For example to time `egrep`, Russ Cox's `xnfa` matcher<sup>5</sup>, perl's regex implementation and polyregex you can use:
 
-```
+```shell
 cd timing
 PATH=".:$PATH" ./xtime xegrep xnfa xperl xnfa-java
 ```
@@ -81,7 +81,7 @@ The `BackrefRunner(input)` constructor calls `buildSubNFAs`. This function creat
 Now, when the recursion ends, we have the following work for each subNFA:
 
 
-```
+```java
 CaptureState cstate = new CaptureState(starts.clone(), ends.clone(), text.length());
 capToSub.put(cstate, new SubNFA(start, cstate));
 ```
